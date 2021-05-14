@@ -1,11 +1,15 @@
 data:
-  forecast_version: '/ihme/covid-19/seir-forecast/2021_05_10.05'
+  forecast_version: '/ihme/covid-19-2/seir-forecast/2021_05_13.03'
   mortality_ratio_version: 'best'
   scenarios:
     - 'reference'
+    - 'mod_npi_high_vacc'
+    - 'low_npi_high_vacc'
+    - 'mod_npi_low_vacc'
+    - 'low_npi_low_vacc'
   output_root: ''
 workflow:
-  project: 'proj_covid_prod'
+  project: 'proj_covid'
   queue: 'd.q'
 resampling:
   reference_scenario: 'reference'

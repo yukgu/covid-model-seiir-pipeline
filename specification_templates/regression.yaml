@@ -1,13 +1,13 @@
 data:
   infection_version: '2021_05_05.03'
-  covariate_version: '2021_05_10.04'
+  covariate_version: '2021_05_13.06'
   coefficient_version: ''
   location_set_version_id: ''
   location_set_file: '/ihme/covid-19/seir-pipeline-outputs/metadata-inputs/location_metadata_810.2.csv'
   output_root: ''
   output_format: 'parquet'
 workflow:
-  project: 'proj_covid_prod'
+  project: 'proj_covid'
   queue: 'd.q'
 regression_parameters:
   n_draws: 100
