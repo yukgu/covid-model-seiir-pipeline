@@ -5,7 +5,7 @@ root_dir <- "/ihme/covid-19-2/seir-outputs/"
 output_version <- "2021_05_13.03"
 quants <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
 start_date <- as.Date("2021-05-02")
-end_date <- as.Date("2021-10-30")
+end_date <- as.Date("2022-03-01")
 
 # Tables
 source(file.path("/ihme/cc_resources/libraries/current/r/get_location_metadata.R"))
@@ -13,11 +13,17 @@ hierarchy <- get_location_metadata(location_set_id = 111, location_set_version_i
 us_terr <- c("American Samoa", "Guam", "Northern Mariana Islands", "Puerto Rico", "United States Virgin Islands")
 midas_locs <- fread("https://raw.githubusercontent.com/midas-network/covid19-scenario-modeling-hub/master/data-locations/locations.csv")
 
-scenarios <- data.table(expand.grid(c("mod_npi", "low_npi"), c("high_vacc", "low_vacc")))
+# scenarios <- data.table(expand.grid(c("mod_npi", "low_npi"), c("high_vacc", "low_vacc")))
+# scenarios[, scen := paste0(Var1, "_", Var2)]
+# scenarios <- rbind(scenarios, data.table(scen = "reference"), fill = T)
+# scenarios$scenario_name <- c("highVac_modNPI", "highVac_lowNPI", "lowVac_modNPI", "lowVac_lowNPI", "reference")
+# scenarios$scenario_id <- c("A-2021-05-02", "B-2021-05-02", "C-2021-05-02", "D-2021-05-02", NA)
+
+scenarios <- data.table(expand.grid(c("mod_npi"), c("low_vacc")))
 scenarios[, scen := paste0(Var1, "_", Var2)]
-scenarios <- rbind(scenarios, data.table(scen = "reference"), fill = T)
-scenarios$scenario_name <- c("highVac_modNPI", "highVac_lowNPI", "lowVac_modNPI", "lowVac_lowNPI", "reference")
-scenarios$scenario_id <- c("A-2021-05-02", "B-2021-05-02", "C-2021-05-02", "D-2021-05-02", NA)
+scenarios <- rbind(data.table(scen = "reference"), scenarios, fill = T)
+scenarios$scenario_name <- c("lowVac_modNPI", "lowVac_lowNPI")
+scenarios$scenario_id <- c( "C-2021-05-02", "D-2021-05-02")
 
 measures <- c("deaths", "cases", "hospitalizations")
 file_names <- c("unscaled_daily_deaths.csv", "daily_infected.csv", "hospital_admissions.csv")
@@ -92,6 +98,7 @@ for(loc_id in loc_list) {
   plot_dt <- melt_week[location_id == loc_id & type == "point"]
   gg <- ggplot(plot_dt, aes(x = target_end_date, y = value, color = scenario_name)) + geom_line() +
     facet_wrap(~measure, scales = "free_y", nrow = 3) +
+    geom_vline(xintercept = as.Date("2021-10-30"), alpha = 0.5) + 
     theme_bw() +
     theme(legend.position="bottom", legend.title = element_blank()) + 
     ggtitle(hierarchy[location_id == loc_id]$location_name) +
@@ -100,20 +107,19 @@ for(loc_id in loc_list) {
 }
 dev.off()
 
-name_dt <- merge(week_results[location_id %in% loc_list], hierarchy[, .(location_id, location_name)])
-setdiff(midas_locs$location_name, unique(name_dt$location_name))
-setdiff(unique(name_dt$location_name), midas_locs$location_name)
+name_dt <- merge(melt_week[location_id %in% loc_list], hierarchy[, .(location_id, location_name)])
+# setdiff(midas_locs$location_name, unique(name_dt$location_name))
+# setdiff(unique(name_dt$location_name), midas_locs$location_name)
 name_dt[location_name == "United States of America", location_name := "US"]
 name_dt[location_name == "United States Virgin Islands", location_name := "Virgin Islands"]
 midas_name_dt <- merge(name_dt, midas_locs[, .(location, location_name)], by = "location_name", all.x = T)
 midas_name_dt[, c("location_name", "location_id") := NULL]
 
 midas_name_dt[, model_projection_date := start_date]
+out_dt <- midas_name_dt[measure %in% c("cases", "deaths") & scenario_name != "reference", .(model_projection_date, target, target_end_date, scenario_name, scenario_id, location, type, quantile, value)]
 
-
-out_dt <- midas_name_dt[, .(model_projection_date, target, target_end_date, scenario_name, scenario_id, location, type, quantile, value)]
-
-out_dir <- "/homes/aucarter/Downloads"
-out_file <- paste0(start_date, "-IHME-IHME COVID model.csv")
+out_dir <- "/homes/aucarter/projects/covid/covid19-scenario-modeling-hub/data-processed/IHME-IHME COVID model (deaths unscaled)"
+out_file <- paste0(start_date, "-IHME-IHME COVID model (deaths unscaled).csv")
 out_path <- file.path(out_dir, out_file)
+out_dt[location %in% 1:9, location := paste0("0", location)]
 write.csv(out_dt, out_path, row.names = F)
