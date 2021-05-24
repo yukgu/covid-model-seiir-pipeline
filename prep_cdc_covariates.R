@@ -45,3 +45,10 @@ scen_mask[!is.na(reduction), (eff_vars) :=
 scen_mask[, reduction := NULL]
 mask_out_path <- paste0("/ihme/covid-19-2/mask-use-outputs/best/mask_use_", scen_eff_label,".csv")
 write.csv(scen_mask, mask_out_path, row.names = F)
+
+## Prep vaccine coverage
+vaccine_coverage_path <- "/ihme/covid-19-2/vaccine-coverage/best/slow_scenario_vaccine_coverage.csv"
+vaccine_dt <- fread(vaccine_coverage_path)
+names(vaccine_dt)
+us_dt <- vaccine_dt[location_id %in% 523:573, c("location_id", "date", grep("_effective_protected", names(vaccine_dt), value = T)), with = F]
+# TODO: This needs to be augmented to scale up to 95% in each bin, retaining state proportions, to bring the national coverage to 83%
