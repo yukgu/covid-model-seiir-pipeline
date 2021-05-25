@@ -48,7 +48,6 @@ def run_beta_fit(fit_version: str, scenario: str, draw_id: int, progress_bar: bo
         rhos,
         vaccinations,
         sampled_params,
-        draw_id,
     )
 
     logger.info('Running ODE fit', context='compute_ode')

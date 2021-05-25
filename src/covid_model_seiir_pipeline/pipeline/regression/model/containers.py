@@ -72,6 +72,11 @@ class ODEParameters:
     immune_wild_type_hr: pd.Series
     immune_all_types_hr: pd.Series
 
+    # Waning parameters
+    waning_start: pd.Series
+    waning_mean: pd.Series
+    waning_sd: pd.Series
+
     def reindex(self, index: pd.Index) -> 'ODEParameters':
         return ODEParameters(
             **{key: value.reindex(index) for key, value in self.to_dict().items() if isinstance(value, pd.Series)},

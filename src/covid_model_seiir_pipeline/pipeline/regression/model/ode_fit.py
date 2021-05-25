@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+import scipy.stats
 import tqdm
 
 from covid_model_seiir_pipeline.lib import (
@@ -18,8 +19,7 @@ def prepare_ode_fit_parameters(past_infections: pd.Series,
                                population: pd.DataFrame,
                                rhos: pd.DataFrame,
                                vaccinations: pd.DataFrame,
-                               sampled_params: Dict[str, pd.Series],
-                               draw_id: int) -> ODEParameters:
+                               sampled_params: Dict[str, pd.Series]) -> ODEParameters:
     past_index = past_infections.index
     population_low_risk, population_high_risk = split_population(past_index, population)
 
@@ -144,12 +144,14 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
         )
 
     params = np.hstack(params).T
+    dist_params = [get_waning_dist(ode_parameters)]
 
-    result = math.solve_ode(
+    result = math.solve_dde(
         system=ode.fit_system,
         t=t,
         init_cond=initial_condition,
         params=params,
+        dist_params=dist_params,
     )
     components = pd.DataFrame(
         data=result.T,
@@ -218,3 +220,10 @@ def filter_to_epi_threshold(infections: pd.Series,
             start_date = infections.index.min()
             break
     return infections.loc[start_date:]
+
+
+def get_waning_dist(ode_parameters: ODEParameters):
+    start = ode_parameters.waning_start.mean()
+    mean = ode_parameters.waning_mean.mean()
+    var = ode_parameters.waning_sd.mean()**2
+    return scipy.stats.gamma(loc=start, scale=var/mean, a=mean**2/var)

@@ -36,8 +36,11 @@ def run_beta_regression(regression_version: str, draw_id: int, progress_bar: boo
 
     np.random.seed(draw_id)
     sampled_params = model.sample_params(
-        infections.index, regression_params,
-        params_to_sample=['alpha', 'sigma', 'gamma1', 'gamma2', 'kappa', 'chi', 'pi']
+        infections.index,
+        regression_params,
+        params_to_sample=['alpha', 'sigma', 'gamma1', 'gamma2',
+                          'kappa', 'chi', 'pi',
+                          'waning_start', 'waning_mean', 'waning_sd'],
     )
 
     sampled_params['phi'] = pd.Series(
@@ -57,7 +60,6 @@ def run_beta_regression(regression_version: str, draw_id: int, progress_bar: boo
         rhos,
         vaccinations,
         sampled_params,
-        draw_id,
     )
 
     logger.info('Running ODE fit', context='compute_ode')

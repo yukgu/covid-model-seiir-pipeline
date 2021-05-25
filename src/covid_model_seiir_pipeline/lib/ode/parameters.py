@@ -39,11 +39,12 @@ def make_aggregates(y: np.ndarray) -> np.ndarray:
     aggregates = np.zeros(len(AGGREGATES))
 
     for group_y in np.split(y, N_GROUPS):
+        aggregates[AGGREGATES.susceptible_wild] += group_y[:, SUSCEPTIBLE_WILD].sum()
+        aggregates[AGGREGATES.susceptible_variant_only] += group_y[:, SUSCEPTIBLE_VARIANT_ONLY].sum()
 
         aggregates[AGGREGATES.infectious_wild] += group_y[:, INFECTIOUS_WILD].sum()
         aggregates[AGGREGATES.infectious_variant] += group_y[:, INFECTIOUS_VARIANT].sum()
-        aggregates[AGGREGATES.susceptible_wild] += group_y[:, SUSCEPTIBLE_WILD].sum()
-        aggregates[AGGREGATES.susceptible_variant_only] += group_y[:, SUSCEPTIBLE_VARIANT_ONLY].sum()
+
         # Ignore tracking compartments when computing the group sum.
         aggregates[AGGREGATES.n_total] += group_y[:, np.array(COMPARTMENTS)].sum()
 
@@ -55,6 +56,7 @@ def make_aggregates(y: np.ndarray) -> np.ndarray:
 
 @numba.njit
 def normalize_parameters(input_parameters: np.ndarray,
+                         dist_parameters: np.ndarray,
                          aggregates: np.ndarray,
                          forecast: bool) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Coerces all parameterizations of the ODE model to the same format.

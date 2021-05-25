@@ -80,8 +80,11 @@ _Compartments = namedtuple(
 
 _TrackingCompartments = namedtuple(
     'TrackingCompartments', [
-        'NewE_wild', 'NewE_variant', 'NewE_p_wild', 'NewE_p_variant',
-        'NewE_nbt', 'NewE_vbt', 'NewS_v', 'NewR_w',
+        'NewE_wild', 'NewE_variant',
+        'NewE_p_wild', 'NewE_p_variant',
+        'NewE_nbt', 'NewE_vbt',
+        'NewR', 'NewR_variant',
+        'NewS_v', 'NewR_w',
         'V_u', 'V_p', 'V_pa', 'V_m', 'V_ma',
     ]
 )
