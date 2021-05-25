@@ -17,6 +17,8 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     PARAMETERS,
     SUSCEPTIBLE_WILD,
     SUSCEPTIBLE_VARIANT_ONLY,
+    REMOVED_WILD,
+    REMOVED_VARIANT,
 )
 
 
@@ -36,17 +38,20 @@ def make_aggregates(y: np.ndarray) -> np.ndarray:
         index mapping.
 
     """
-    aggregates = np.zeros(len(AGGREGATES))
+    aggregates = np.zeros((len(AGGREGATES), y.shape[1]))
 
     for group_y in np.split(y, N_GROUPS):
-        aggregates[AGGREGATES.susceptible_wild] += group_y[:, SUSCEPTIBLE_WILD].sum()
-        aggregates[AGGREGATES.susceptible_variant_only] += group_y[:, SUSCEPTIBLE_VARIANT_ONLY].sum()
+        aggregates[AGGREGATES.susceptible_wild] += group_y[SUSCEPTIBLE_WILD, :].sum(axis=0)
+        aggregates[AGGREGATES.susceptible_variant_only] += group_y[SUSCEPTIBLE_VARIANT_ONLY, :].sum(axis=0)
 
-        aggregates[AGGREGATES.infectious_wild] += group_y[:, INFECTIOUS_WILD].sum()
-        aggregates[AGGREGATES.infectious_variant] += group_y[:, INFECTIOUS_VARIANT].sum()
+        aggregates[AGGREGATES.infectious_wild] += group_y[INFECTIOUS_WILD, :].sum(axis=0)
+        aggregates[AGGREGATES.infectious_variant] += group_y[INFECTIOUS_VARIANT, :].sum(axis=0)
+
+        aggregates[AGGREGATES.removed_wild] += group_y[REMOVED_WILD, :].sum(axis=0)
+        aggregates[AGGREGATES.removed_variant] += group_y[REMOVED_VARIANT, :].sum(axis=0)
 
         # Ignore tracking compartments when computing the group sum.
-        aggregates[AGGREGATES.n_total] += group_y[:, np.array(COMPARTMENTS)].sum()
+        aggregates[AGGREGATES.n_total] += group_y[np.array(COMPARTMENTS), :].sum(axis=0)
 
     if DEBUG:
         assert np.all(np.isfinite(aggregates))
@@ -90,7 +95,7 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     """
     alpha = input_parameters[PARAMETERS.alpha]
-
+    import pdb; pdb.set_trace()
     if forecast:
         param_size = len(PARAMETERS) + len(FORECAST_PARAMETERS)
         params, vaccines = input_parameters[:param_size], input_parameters[param_size:]

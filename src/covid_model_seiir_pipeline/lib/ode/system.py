@@ -67,7 +67,12 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
 
     """
     aggregates = parameters.make_aggregates(y)
-    params, vaccines, new_e = parameters.normalize_parameters(input_parameters, aggregates, forecast)
+    params, vaccines, new_e = parameters.normalize_parameters(
+        input_parameters, 
+        distribution_parameters,
+        aggregates, 
+        forecast,
+    )
 
     system_size = len(y) // N_GROUPS
     dy = np.zeros_like(y)
