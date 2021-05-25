@@ -22,17 +22,17 @@ from covid_model_seiir_pipeline.lib.ode import (
 
 
 @numba.njit
-def fit_system(t: float, y: np.ndarray, input_parameters: np.ndarray):
-    return _system(t, y, input_parameters, forecast=False)
+def fit_system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray):
+    return _system(t, y, input_parameters, distribution_parameters, forecast=False)
 
 
 @numba.njit
-def forecast_system(t: float, y: np.ndarray, input_parameters: np.ndarray):
-    return _system(t, y, input_parameters, forecast=True)
+def forecast_system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray):
+    return _system(t, y, input_parameters, distribution_parameters, forecast=True)
 
 
 @numba.njit
-def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, forecast: bool):
+def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray, forecast: bool):
     """The COVID ODE system.
 
     This is a shared representation of the COVID ODE system meant for use in
@@ -55,6 +55,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, forecast: boo
         :obj:`FIT_PARAMETERS` or :obj:`FORECAST_PARAMETERS`, and whose
         remaining elements are the :obj:`VACCINE_TYPES` for each of the
         :obj:`N_GROUPS`.
+    distribution_parameters
     forecast
         The `input_parameters` are for the forecast if `True`, otherwise
         `input_parameters` are for the beta fit.

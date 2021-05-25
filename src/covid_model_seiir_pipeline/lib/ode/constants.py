@@ -36,6 +36,11 @@ _ForecastParameters = namedtuple(
     ]
 )
 
+_DistributionParameters = namedtuple(
+    'DistributionParameters', [
+        'waning_immunity_time',
+    ]
+)
 
 _NewE = namedtuple(
     'NewE', [
@@ -47,6 +52,7 @@ _Aggregates = namedtuple(
     'Aggregates', [
         'susceptible_wild', 'susceptible_variant_only',
         'infectious_wild', 'infectious_variant',
+        'removed_wild', 'removed_variant',
         'n_total',
     ]
 )
@@ -91,6 +97,9 @@ FIT_PARAMETERS = _FitParameters(*[
 FORECAST_PARAMETERS = _ForecastParameters(*[
     i + len(PARAMETERS) for i in range(len(_ForecastParameters._fields))
 ])
+DISTRIBUTION_PARAMETERS = _DistributionParameters(
+    *list(range(len(_DistributionParameters._fields)))
+)
 NEW_E = _NewE(*list(range(len(_NewE._fields))))
 AGGREGATES = _Aggregates(*list(range(len(_Aggregates._fields))))
 VACCINE_TYPES = _VaccineTypes(*list(range(len(_VaccineTypes._fields))))
@@ -126,6 +135,12 @@ INFECTIOUS_VARIANT = np.array([
     COMPARTMENTS.I1_variant,    COMPARTMENTS.I2_variant,
     COMPARTMENTS.I1_variant_u,  COMPARTMENTS.I2_variant_u,
     COMPARTMENTS.I2_variant_pa, COMPARTMENTS.I2_variant_pa,
+])
+REMOVED_WILD = np.array([
+    COMPARTMENTS.R, COMPARTMENTS.R_u, COMPARTMENTS.R_p, COMPARTMENTS.R_pa,
+])
+REMOVED_VARIANT = np.array([
+    COMPARTMENTS.R_variant, COMPARTMENTS.R_variant_u, COMPARTMENTS.R_variant_pa,
 ])
 
 
