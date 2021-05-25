@@ -139,7 +139,7 @@ def normalize_parameters(input_parameters: np.ndarray,
             AGGREGATES.susceptible_wild, AGGREGATES.susceptible_variant_only,
             AGGREGATES.infectious_wild, AGGREGATES.infectious_variant,
             AGGREGATES.n_total,
-        ])]
+        ]), -1]
 
         si_wild = susceptible_wild * infectious_wild ** alpha
         si_variant_naive = scale * susceptible_wild * infectious_variant ** alpha
@@ -155,8 +155,8 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
-    waned[WANED.wild] = (aggregates[AGGREGATES.removed_wild, ::-1] * waning_dist[1:]).sum()
-    waned[WANED.variant] = (aggregates[AGGREGATES.removed_variant, ::-1] * waning_dist[1:]).sum()
+    waned[WANED.wild] = (aggregates[AGGREGATES.removed_wild, ::-1] * waning_dist).sum()
+    waned[WANED.variant] = (aggregates[AGGREGATES.removed_variant, ::-1] * waning_dist).sum()
 
     if DEBUG:
         assert np.all(np.isfinite(params))

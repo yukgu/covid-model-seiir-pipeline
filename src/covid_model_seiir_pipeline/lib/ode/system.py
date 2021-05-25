@@ -76,7 +76,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
     )
 
     system_size = len(y) // N_GROUPS
-    dy = np.zeros_like(y)
+    dy = np.zeros_like(y[:, -1])
     for i in range(N_GROUPS):
         group_start = i * system_size
         group_end = (i + 1) * system_size
@@ -163,7 +163,7 @@ def _single_group_system(t: float,
     ###############
     # Epi transitions only
     transition_map = _seiir_transition_wild(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_u, COMPARTMENTS.E_u, COMPARTMENTS.I1_u, COMPARTMENTS.I2_u, COMPARTMENTS.R_u,
         COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u,
         transition_map,
@@ -174,7 +174,7 @@ def _single_group_system(t: float,
     #################################
     # Epi transitions only
     transition_map = _seiir_transition_wild(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_p, COMPARTMENTS.E_p, COMPARTMENTS.I1_p, COMPARTMENTS.I2_p, COMPARTMENTS.R_p,
         COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u,
         transition_map,
@@ -185,7 +185,7 @@ def _single_group_system(t: float,
     ############################
     # Epi transitions only
     transition_map = _seiir_transition_wild(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_pa, COMPARTMENTS.E_pa, COMPARTMENTS.I1_pa, COMPARTMENTS.I2_pa, COMPARTMENTS.R_pa,
         COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa,
         transition_map,
@@ -196,7 +196,7 @@ def _single_group_system(t: float,
     ########################
     # Epi transitions
     transition_map = seiir_transition_variant(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_variant, COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant,
         COMPARTMENTS.I2_variant, COMPARTMENTS.R_variant,
         transition_map,
@@ -226,7 +226,7 @@ def _single_group_system(t: float,
     #######################
     # Epi transitions only
     transition_map = seiir_transition_variant(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
         COMPARTMENTS.I2_variant_u, COMPARTMENTS.R_variant_u,
         transition_map,
@@ -237,7 +237,7 @@ def _single_group_system(t: float,
     #####################
     # Epi transitions only
     transition_map = seiir_transition_variant(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa, COMPARTMENTS.I1_variant_pa,
         COMPARTMENTS.I2_variant_pa, COMPARTMENTS.R_variant_pa,
         transition_map,

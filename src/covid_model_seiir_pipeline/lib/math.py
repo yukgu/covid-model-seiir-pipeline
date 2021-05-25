@@ -106,7 +106,6 @@ def rk45_dde(system,
              dt):
     grouped_dist_params = np.zeros_like(dist_params)
     grouped_dist_params[:, ::2] = dist_params[:, ::2] + dist_params[:, 1::2]
-    import pdb; pdb.set_trace()
     for i in range(2, t_solve.size, 2):
         y_past = y_solve[:, :(i - 1):2]
         dist_past = grouped_dist_params[:, :(i - 1):2] / dt
