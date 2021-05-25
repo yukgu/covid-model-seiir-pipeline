@@ -9,6 +9,7 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     COMPARTMENTS,
     DEBUG,
     NEW_E,
+    WANED,
     PARAMETERS,
     UNVACCINATED,
     VACCINE_TYPES,
@@ -20,7 +21,8 @@ def allocate(group_y: np.ndarray,
              params: np.ndarray,
              aggregates: np.ndarray,
              group_vaccines: np.ndarray,
-             new_e: np.ndarray) -> np.ndarray:
+             new_e: np.ndarray,
+             waned: np.ndarray) -> np.ndarray:
     """Allocate vaccines to compartments by effectiveness.
 
     The input `group_vaccines` tells us about the number of vaccine doses
@@ -49,6 +51,7 @@ def allocate(group_y: np.ndarray,
     new_e
         An array aligning with the :obj:`NEW_E` index mapping representing
         new infections split by variant and source.
+    waned
 
     Returns
     -------
@@ -89,16 +92,20 @@ def allocate(group_y: np.ndarray,
         vaccines_out,
     )
     # Folks in E, I1, I2, R only unprotected.
+    r_frac = math.safe_divide(group_y[COMPARTMENTS.R], aggregates[AGGREGATES.removed_wild])
     vaccines_out = _allocate_from_not_s(
         group_y,
         params,
+        waned[WANED.wild] * r_frac,
         n_vaccines_group, n_unvaccinated_group,
         COMPARTMENTS.E, COMPARTMENTS.I1, COMPARTMENTS.I2, COMPARTMENTS.R,
         vaccines_out,
     )
+    r_variant_frac = math.safe_divide(group_y[COMPARTMENTS.R_variant], aggregates[AGGREGATES.removed_variant])
     vaccines_out = _allocate_from_not_s(
         group_y,
         params,
+        waned[WANED.variant] * r_variant_frac,
         n_vaccines_group, n_unvaccinated_group,
         COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant, COMPARTMENTS.I2_variant, COMPARTMENTS.R_variant,
         vaccines_out,
@@ -172,6 +179,7 @@ def _allocate_from_s_variant(group_y: np.ndarray,
 @numba.njit
 def _allocate_from_not_s(group_y: np.ndarray,
                          params: np.ndarray,
+                         waned: float,
                          v_total: float, n_unvaccinated: float,
                          exposed: int, infectious1: int, infectious2: int, removed: int,
                          vaccines_out: np.ndarray) -> np.ndarray:
@@ -188,7 +196,7 @@ def _allocate_from_not_s(group_y: np.ndarray,
             group_y[compartment] / n_unvaccinated * v_total
         )
     vaccines_out[removed, VACCINE_TYPES.u] = min(
-        group_y[removed],
+        group_y[removed] - waned,
         group_y[removed] / n_unvaccinated * v_total
     )
 

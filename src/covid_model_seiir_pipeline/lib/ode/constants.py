@@ -44,7 +44,12 @@ _DistributionParameters = namedtuple(
 
 _NewE = namedtuple(
     'NewE', [
-        'wild', 'variant_naive', 'variant_reinf', 'total'
+        'wild', 'variant_naive', 'variant_reinf', 'total',
+    ]
+)
+_Waned = namedtuple(
+    'Waned', [
+        'wild', 'variant', 'total',
     ]
 )
 
@@ -83,6 +88,7 @@ _TrackingCompartments = namedtuple(
         'NewE_wild', 'NewE_variant',
         'NewE_p_wild', 'NewE_p_variant',
         'NewE_nbt', 'NewE_vbt',
+        'Waned_wild', 'Waned_variant',
         'NewR', 'NewR_variant',
         'NewS_v', 'NewR_w',
         'V_u', 'V_p', 'V_pa', 'V_m', 'V_ma',
@@ -104,6 +110,7 @@ DISTRIBUTION_PARAMETERS = _DistributionParameters(
     *list(range(len(_DistributionParameters._fields)))
 )
 NEW_E = _NewE(*list(range(len(_NewE._fields))))
+WANED = _Waned(*list(range(len(_Waned._fields))))
 AGGREGATES = _Aggregates(*list(range(len(_Aggregates._fields))))
 VACCINE_TYPES = _VaccineTypes(*list(range(len(_VaccineTypes._fields))))
 COMPARTMENTS = _Compartments(*list(range(len(_Compartments._fields))))

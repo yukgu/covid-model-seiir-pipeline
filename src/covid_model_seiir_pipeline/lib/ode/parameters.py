@@ -10,10 +10,12 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     DEBUG,
     FIT_PARAMETERS,
     FORECAST_PARAMETERS,
+    DISTRIBUTION_PARAMETERS,
     INFECTIOUS_WILD,
     INFECTIOUS_VARIANT,
     N_GROUPS,
     NEW_E,
+    WANED,
     PARAMETERS,
     SUSCEPTIBLE_WILD,
     SUSCEPTIBLE_VARIANT_ONLY,
@@ -63,7 +65,7 @@ def make_aggregates(y: np.ndarray) -> np.ndarray:
 def normalize_parameters(input_parameters: np.ndarray,
                          dist_parameters: np.ndarray,
                          aggregates: np.ndarray,
-                         forecast: bool) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                         forecast: bool) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Coerces all parameterizations of the ODE model to the same format.
 
     Parameters
@@ -74,6 +76,7 @@ def normalize_parameters(input_parameters: np.ndarray,
         :obj:`FIT_PARAMETERS` or :obj:`FORECAST_PARAMETERS`, and whose
         remaining elements are the :obj:`VACCINE_TYPES` for each of the
         :obj:`N_GROUPS`.
+    dist_parameters
     aggregates
         An array that aligns with the :obj:`AGGREGATES` index mapping
         representing aggregates of the full ODE system like the total
@@ -95,7 +98,6 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     """
     alpha = input_parameters[PARAMETERS.alpha]
-    import pdb; pdb.set_trace()
     if forecast:
         param_size = len(PARAMETERS) + len(FORECAST_PARAMETERS)
         params, vaccines = input_parameters[:param_size], input_parameters[param_size:]
@@ -104,13 +106,17 @@ def normalize_parameters(input_parameters: np.ndarray,
         beta_variant = params[FORECAST_PARAMETERS.beta_variant]
         params = params[np.array(PARAMETERS)]
 
-        b_wild = beta_wild * aggregates[AGGREGATES.infectious_wild]**alpha / aggregates[AGGREGATES.n_total]
-        b_variant = beta_variant * aggregates[AGGREGATES.infectious_variant]**alpha / aggregates[AGGREGATES.n_total]
+        b_wild = (
+            beta_wild * aggregates[AGGREGATES.infectious_wild, -1]**alpha / aggregates[AGGREGATES.n_total, -1]
+        )
+        b_variant = (
+            beta_variant * aggregates[AGGREGATES.infectious_variant, -1]**alpha / aggregates[AGGREGATES.n_total, -1]
+        )
 
         new_e = np.zeros(len(NEW_E))
-        new_e[NEW_E.wild] = b_wild * aggregates[AGGREGATES.susceptible_wild]
-        new_e[NEW_E.variant_naive] = b_variant * aggregates[AGGREGATES.susceptible_wild]
-        new_e[NEW_E.variant_reinf] = b_variant * aggregates[AGGREGATES.susceptible_variant_only]
+        new_e[NEW_E.wild] = b_wild * aggregates[AGGREGATES.susceptible_wild, -1]
+        new_e[NEW_E.variant_naive] = b_variant * aggregates[AGGREGATES.susceptible_wild, -1]
+        new_e[NEW_E.variant_reinf] = b_variant * aggregates[AGGREGATES.susceptible_variant_only, -1]
         new_e[NEW_E.total] = new_e.sum()
 
     else:
@@ -147,9 +153,14 @@ def normalize_parameters(input_parameters: np.ndarray,
         new_e[NEW_E.variant_reinf] = si_variant_reinf / z * new_e_total
         new_e[NEW_E.total] = new_e_total
 
+    waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
+    waned = np.zeros(len(WANED))
+    waned[WANED.wild] = (aggregates[AGGREGATES.removed_wild, ::-1] * waning_dist[1:]).sum()
+    waned[WANED.variant] = (aggregates[AGGREGATES.removed_variant, ::-1] * waning_dist[1:]).sum()
+
     if DEBUG:
         assert np.all(np.isfinite(params))
         assert np.all(np.isfinite(vaccines))
         assert np.all(np.isfinite(new_e))
 
-    return params, vaccines, new_e
+    return params, vaccines, new_e, waned

@@ -81,6 +81,19 @@ def compute_tracking_columns(group_dy: np.ndarray,
     # New variant type infections breaking through vaccine immunity
     group_dy[TRACKING_COMPARTMENTS.NewE_vbt] = transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa]
 
+    group_dy[TRACKING_COMPARTMENTS.Waned_wild] = (
+        transition_map[COMPARTMENTS.R, COMPARTMENTS.S],
+        transition_map[COMPARTMENTS.R_u, COMPARTMENTS.S_u],
+        transition_map[COMPARTMENTS.R_p, COMPARTMENTS.S_p],
+        transition_map[COMPARTMENTS.R_pa, COMPARTMENTS.S_pa],
+    )
+
+    group_dy[TRACKING_COMPARTMENTS.Waned_variant] = (
+        transition_map[COMPARTMENTS.R_variant, COMPARTMENTS.S_variant],
+        transition_map[COMPARTMENTS.R_variant_u, COMPARTMENTS.S_variant_u],
+        transition_map[COMPARTMENTS.R_variant_pa, COMPARTMENTS.S_variant_pa],
+    )
+
     # Proportion cross immune checks
     group_dy[TRACKING_COMPARTMENTS.NewS_v] = (
         transition_map[COMPARTMENTS.I2, COMPARTMENTS.S_variant]

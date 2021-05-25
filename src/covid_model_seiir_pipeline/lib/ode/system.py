@@ -10,6 +10,7 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     DEBUG,
     N_GROUPS,
     NEW_E,
+    WANED,
     PARAMETERS,
     VACCINE_TYPES,
 )
@@ -67,10 +68,10 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
 
     """
     aggregates = parameters.make_aggregates(y)
-    params, vaccines, new_e = parameters.normalize_parameters(
-        input_parameters, 
+    params, vaccines, new_e, waned = parameters.normalize_parameters(
+        input_parameters,
         distribution_parameters,
-        aggregates, 
+        aggregates,
         forecast,
     )
 
@@ -82,14 +83,15 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
         group_vaccine_start = i * len(VACCINE_TYPES)
         group_vaccine_end = (i + 1) * len(VACCINE_TYPES)
 
-        group_y = y[group_start:group_end]
+        group_y = y[group_start:group_end, -1]
         group_vaccines = vaccines[group_vaccine_start:group_vaccine_end]
 
         group_dy = _single_group_system(
             t,
             group_y,
             new_e,
-            aggregates,
+            waned,
+            aggregates[:, -1],
             params,
             group_vaccines,
         )
@@ -97,7 +99,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
         group_dy = escape_variant.maybe_invade(
             group_y,
             group_dy,
-            aggregates,
+            aggregates[:, -1],
             params,
         )
 
@@ -113,6 +115,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
 def _single_group_system(t: float,
                          group_y: np.ndarray,
                          new_e: np.ndarray,
+                         waned: np.ndarray,
                          aggregates: np.ndarray,
                          params: np.ndarray,
                          group_vaccines: np.ndarray):
@@ -128,6 +131,7 @@ def _single_group_system(t: float,
         aggregates,
         group_vaccines,
         new_e,
+        waned,
     )
 
     ################
@@ -135,7 +139,7 @@ def _single_group_system(t: float,
     ################
     # Epi transitions
     transition_map = _seiir_transition_wild(
-        group_y, params, aggregates, new_e,
+        group_y, params, aggregates, new_e, waned,
         COMPARTMENTS.S, COMPARTMENTS.E, COMPARTMENTS.I1, COMPARTMENTS.I2, COMPARTMENTS.R,
         COMPARTMENTS.S_variant, COMPARTMENTS.E_variant,
         transition_map,
@@ -271,19 +275,23 @@ def _seiir_transition_wild(group_y: np.ndarray,
                            params: np.ndarray,
                            aggregates: np.ndarray,
                            new_e: np.ndarray,
+                           waned: np.ndarray,
                            susceptible: int, exposed: int, infectious1: int, infectious2: int, removed: int,
                            susceptible_variant: int, exposed_variant: int,
                            transition_map: np.ndarray) -> np.ndarray:
     """Epi transitions from the wild type compartments among a vaccination subgroup."""
     total_susceptible = aggregates[AGGREGATES.susceptible_wild]
+    total_removed = aggregates[AGGREGATES.removed_wild]
 
     new_e_wild = math.safe_divide(group_y[susceptible] * new_e[NEW_E.wild], total_susceptible)
     new_e_variant = math.safe_divide(group_y[susceptible] * new_e[NEW_E.variant_naive], total_susceptible)
+    new_waned = math.safe_divide(group_y[removed] * waned[WANED.wild], total_removed)
 
     transition_map[susceptible, exposed] += new_e_wild
     transition_map[exposed, infectious1] += params[PARAMETERS.sigma] * group_y[exposed]
     transition_map[infectious1, infectious2] += params[PARAMETERS.gamma1] * group_y[infectious1]
     transition_map[infectious2, removed] += params[PARAMETERS.chi] * params[PARAMETERS.gamma2] * group_y[infectious2]
+    transition_map[removed, susceptible] += new_waned
 
     transition_map[susceptible, exposed_variant] += new_e_variant
     transition_map[infectious2, susceptible_variant] += (
@@ -301,17 +309,21 @@ def seiir_transition_variant(group_y: np.ndarray,
                              params: np.ndarray,
                              aggregates: np.ndarray,
                              new_e: np.ndarray,
+                             waned: np.ndarray,
                              susceptible, exposed, infectious1, infectious2, removed,
                              transition_map):
     """Epi transitions from the escape variant compartments among a vaccination subgroup."""
     total_susceptible = aggregates[AGGREGATES.susceptible_variant_only]
+    total_removed = aggregates[AGGREGATES.removed_variant]
 
     new_e_variant = math.safe_divide(group_y[susceptible] * new_e[NEW_E.variant_reinf], total_susceptible)
+    new_waned = math.safe_divide(group_y[removed] * waned[WANED.variant], total_removed)
 
     transition_map[susceptible, exposed] += new_e_variant
     transition_map[exposed, infectious1] += params[PARAMETERS.sigma] * group_y[exposed]
     transition_map[infectious1, infectious2] += params[PARAMETERS.gamma1] * group_y[infectious1]
     transition_map[infectious2, removed] += params[PARAMETERS.gamma2] * group_y[infectious2]
+    transition_map[removed, susceptible] += new_waned
 
     if DEBUG:
         assert np.all(transition_map >= 0)
