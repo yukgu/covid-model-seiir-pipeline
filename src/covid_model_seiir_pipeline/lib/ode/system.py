@@ -23,17 +23,24 @@ from covid_model_seiir_pipeline.lib.ode import (
 
 
 @numba.njit
-def fit_system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray):
-    return _system(t, y, input_parameters, distribution_parameters, forecast=False)
+def fit_system(t: float,
+               y: np.ndarray, y_past: np.ndarray,
+               input_parameters: np.ndarray, distribution_parameters: np.ndarray):
+    return _system(t, y, y_past, input_parameters, distribution_parameters, forecast=False)
 
 
 @numba.njit
-def forecast_system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray):
-    return _system(t, y, input_parameters, distribution_parameters, forecast=True)
+def forecast_system(t: float,
+                    y: np.ndarray, y_past: np.ndarray,
+                    input_parameters: np.ndarray, distribution_parameters: np.ndarray):
+    return _system(t, y, y_past, input_parameters, distribution_parameters, forecast=True)
 
 
 @numba.njit
-def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_parameters: np.ndarray, forecast: bool):
+def _system(t: float,
+            y: np.ndarray, y_past: np.ndarray,
+            input_parameters: np.ndarray, distribution_parameters: np.ndarray,
+            forecast: bool):
     """The COVID ODE system.
 
     This is a shared representation of the COVID ODE system meant for use in
@@ -50,6 +57,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
         should correspond to the concatenation of the :obj:`COMPARTMENTS`
         index map and the :obj:`TRACKING_COMPARTMENTS` index map duplicated
         :obj:`N_GROUPS` times.
+    y_past
     input_parameters
         An array whose first several fields align with the :obj:`PARAMETERS`
         index mapping, whose middle elements align with either the
@@ -67,7 +75,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
         The change in `y` on the next ODE step.
 
     """
-    aggregates = parameters.make_aggregates(y)
+    aggregates = parameters.make_aggregates(y, y_past)
     params, vaccines, new_e, waned = parameters.normalize_parameters(
         input_parameters,
         distribution_parameters,
@@ -83,7 +91,7 @@ def _system(t: float, y: np.ndarray, input_parameters: np.ndarray, distribution_
         group_vaccine_start = i * len(VACCINE_TYPES)
         group_vaccine_end = (i + 1) * len(VACCINE_TYPES)
 
-        group_y = y[group_start:group_end, -1]
+        group_y = y[group_start:group_end]
         group_vaccines = vaccines[group_vaccine_start:group_vaccine_end]
 
         group_dy = _single_group_system(

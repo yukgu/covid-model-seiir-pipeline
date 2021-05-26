@@ -105,43 +105,47 @@ def rk45_dde(system,
              dist_params,
              dt):
     grouped_dist_params = np.zeros_like(dist_params)
-    grouped_dist_params[:, ::2] = dist_params[:, ::2] + dist_params[:, 1::2]
+    grouped_dist_params[:, ::2] = (dist_params[:, ::2] + dist_params[:, 1::2]) / dt
     for i in range(2, t_solve.size, 2):
         y_past = y_solve[:, :(i - 1):2]
-        dist_past = grouped_dist_params[:, :(i - 1):2] / dt
+        dist_past = grouped_dist_params[:, :(i - 1):2]
 
         k1 = system(
             t_solve[i - 2],
-            y_past,
+            y_past[:, -1],
+            y_past[:, :-1],
             params[:, i - 2],
             dist_past,
         )
 
-        y_half_step = (y_solve[:, i - 2] + dt / 2 * k1).reshape(-1, 1)
+        y_half_step = (y_solve[:, i - 2] + dt / 2 * k1)
         dist_half_step = dist_params[:, np.array([i - 1])] / dt
 
         k2 = system(
             t_solve[i - 1],
-            np.hstack((y_past, y_half_step)),
+            y_half_step,
+            y_past,
             params[:, i - 1],
             np.hstack((dist_past, dist_half_step)),
         )
 
-        y_half_step = (y_solve[:, i - 2] + dt / 2 * k2).reshape(-1, 1)
+        y_half_step = (y_solve[:, i - 2] + dt / 2 * k2)
 
         k3 = system(
             t_solve[i - 1],
-            np.hstack((y_past, y_half_step)),
+            y_half_step,
+            y_past,
             params[:, i - 1],
             np.hstack((dist_past, dist_half_step)),
         )
 
-        y_full_step = (y_solve[:, i - 2] + dt * k3).reshape(-1, 1)
+        y_full_step = (y_solve[:, i - 2] + dt * k3)
         dist_full_step = grouped_dist_params[:, np.array([i])] / dt
 
         k4 = system(
             t_solve[i],
-            np.hstack((y_past, y_full_step)),
+            y_full_step,
+            y_past,
             params[:, i],
             np.hstack((dist_past, dist_full_step)),
         )
