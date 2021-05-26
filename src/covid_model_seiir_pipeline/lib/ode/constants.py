@@ -90,6 +90,7 @@ _Aggregates = namedtuple(
 
         'susceptible_wild', 'susceptible_variant_only',
         'infectious_wild', 'infectious_variant',
+        'removed_wild', 'removed_variant',
         'n_total',
     ]
 )
@@ -163,6 +164,8 @@ AGG_MAP = (
     (AGGREGATES.susceptible_variant_only, SUSCEPTIBLE_VARIANT_ONLY),
     (AGGREGATES.infectious_wild, INFECTIOUS_WILD),
     (AGGREGATES.infectious_variant, INFECTIOUS_VARIANT),
+    (AGGREGATES.removed_wild, REMOVED_WILD),
+    (AGGREGATES.removed_variant, REMOVED_VARIANT),
     (AGGREGATES.n_total, np.array(COMPARTMENTS)),
 )
 
