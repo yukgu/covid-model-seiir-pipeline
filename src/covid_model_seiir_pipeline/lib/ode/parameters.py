@@ -25,13 +25,14 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
 
 
 @numba.njit
-def make_aggregates(y: np.ndarray) -> np.ndarray:
+def make_aggregates(y: np.ndarray, y_past: np.ndarray) -> np.ndarray:
     """Make total system aggregates for use in group systems.
 
     Parameters
     ----------
     y
         The state of the full system on the last ODE iteration.
+    y_past
 
     Returns
     -------
@@ -40,20 +41,22 @@ def make_aggregates(y: np.ndarray) -> np.ndarray:
         index mapping.
 
     """
-    aggregates = np.zeros((len(AGGREGATES), y.shape[1]))
+    aggregates = np.zeros((len(AGGREGATES), y_past.shape[1] + 1))
 
-    for group_y in np.split(y, N_GROUPS):
-        aggregates[AGGREGATES.susceptible_wild] += group_y[SUSCEPTIBLE_WILD, :].sum(axis=0)
-        aggregates[AGGREGATES.susceptible_variant_only] += group_y[SUSCEPTIBLE_VARIANT_ONLY, :].sum(axis=0)
+    agg_map = (
+        (AGGREGATES.susceptible_wild, SUSCEPTIBLE_WILD),
+        (AGGREGATES.susceptible_variant_only, SUSCEPTIBLE_VARIANT_ONLY),
+        (AGGREGATES.infectious_wild, INFECTIOUS_WILD),
+        (AGGREGATES.infectious_variant, INFECTIOUS_VARIANT),
+        (AGGREGATES.removed_wild, REMOVED_WILD),
+        (AGGREGATES.removed_variant, REMOVED_VARIANT),
+        (AGGREGATES.n_total, np.array(COMPARTMENTS)),
+    )
 
-        aggregates[AGGREGATES.infectious_wild] += group_y[INFECTIOUS_WILD, :].sum(axis=0)
-        aggregates[AGGREGATES.infectious_variant] += group_y[INFECTIOUS_VARIANT, :].sum(axis=0)
-
-        aggregates[AGGREGATES.removed_wild] += group_y[REMOVED_WILD, :].sum(axis=0)
-        aggregates[AGGREGATES.removed_variant] += group_y[REMOVED_VARIANT, :].sum(axis=0)
-
-        # Ignore tracking compartments when computing the group sum.
-        aggregates[AGGREGATES.n_total] += group_y[np.array(COMPARTMENTS), :].sum(axis=0)
+    for group_y, group_y_past in zip(np.split(y, N_GROUPS), np.split(y_past, N_GROUPS)):
+        for target, compartments in agg_map:
+            aggregates[target, :-1] = group_y_past[compartments, :].sum(axis=0)
+            aggregates[target, -1] = group_y[compartments].sum()
 
     if DEBUG:
         assert np.all(np.isfinite(aggregates))
