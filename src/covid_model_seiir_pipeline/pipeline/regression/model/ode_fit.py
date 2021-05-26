@@ -127,18 +127,27 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
 
     all_group_compartments = list(ode.COMPARTMENTS._fields) + list(ode.TRACKING_COMPARTMENTS._fields)
     aggregate_compartments = list(ode.AGGREGATES._fields)
-    initial_condition = np.zeros(len(pop_groups)*len(all_group_compartments) + len(aggregate_compartments))
+    system_size = len(pop_groups)*len(all_group_compartments)
+    initial_condition = np.zeros(system_size + len(aggregate_compartments))
     params = [ode_parameters.to_df().loc[:, list(ode.PARAMETERS._fields) + list(ode.FIT_PARAMETERS._fields)].values]
 
     for i, (risk_group, group_pop) in enumerate(pop_groups.items()):
+        offset = i * len(all_group_compartments)
         initial_condition = _distribute_initial_condition(
             infections=obs[0],
             group_pop=group_pop,
             total_pop=pop,
             alpha=ode_parameters.alpha[0],
             initial_condition=initial_condition,
-            offset=i * len(all_group_compartments),
+            offset=offset,
         )
+        initial_condition[system_size + ode.AGGREGATES.susceptible_wild] += (
+            initial_condition[offset + ode.COMPARTMENTS.S]
+        )
+        initial_condition[system_size + ode.AGGREGATES.infectious_wild] += (
+            initial_condition[offset + ode.COMPARTMENTS.I1]
+        )
+        initial_condition[system_size + ode.AGGREGATES.n_total] += group_pop
         params.append(
             ode_parameters.get_vaccinations(ode.VACCINE_TYPES._fields, risk_group)
         )
