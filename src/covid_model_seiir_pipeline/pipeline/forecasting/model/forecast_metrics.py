@@ -174,12 +174,7 @@ def variant_system_metrics(indices: Indices,
         modeled_deaths_variant=modeled_deaths_variant,
         modeled_deaths_total=modeled_deaths_wild + modeled_deaths_variant,
 
-        vaccinations_protected_wild=vaccines_p,
-        vaccinations_protected_all=vaccines_pa,
-        vaccinations_immune_wild=vaccines_m,
-        vaccinations_immune_all=vaccines_ma,
         vaccinations_effective=vaccines_p + vaccines_pa + vaccines_m + vaccines_ma,
-        vaccinations_ineffective=vaccines_u,
 
         total_susceptible_wild=s_wild,
         total_susceptible_variant=s_variant,

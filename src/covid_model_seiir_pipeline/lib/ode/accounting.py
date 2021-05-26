@@ -2,8 +2,12 @@ import numba
 import numpy as np
 
 from covid_model_seiir_pipeline.lib.ode.constants import (
+    AGGREGATES,
+    AGG_MAP,
     COMPARTMENTS,
     DEBUG,
+    REMOVED_WILD,
+    REMOVED_VARIANT,
     TRACKING_COMPARTMENTS,
     VACCINE_TYPES,
 )
@@ -72,50 +76,51 @@ def compute_tracking_columns(group_dy: np.ndarray,
         + transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa]
     )
 
+    return group_dy
+
+
+def compute_aggregates(transition_map: np.ndarray, vaccines_out: np.ndarray):
+    aggregates = np.zeros_like(AGGREGATES)
     # New variant type infections breaking through natural immunity
-    group_dy[TRACKING_COMPARTMENTS.NewE_nbt] = (
+    aggregates[AGGREGATES.NewE_nbt] = (
         transition_map[COMPARTMENTS.S_variant, COMPARTMENTS.E_variant]
         + transition_map[COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u]
         + transition_map[COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa]
     )
     # New variant type infections breaking through vaccine immunity
-    group_dy[TRACKING_COMPARTMENTS.NewE_vbt] = transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa]
+    aggregates[AGGREGATES.NewE_vbt] = (
+        transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa]
+    )
 
-    group_dy[TRACKING_COMPARTMENTS.Waned_wild] = (
+    aggregates[AGGREGATES.NewR_wild] = transition_map[:, REMOVED_WILD].sum()
+    aggregates[AGGREGATES.NewR_variant] = transition_map[:, REMOVED_VARIANT].sum()
+
+    aggregates[AGGREGATES.Waned_wild] = (
         transition_map[COMPARTMENTS.R, COMPARTMENTS.S]
         + transition_map[COMPARTMENTS.R_u, COMPARTMENTS.S_u]
         + transition_map[COMPARTMENTS.R_p, COMPARTMENTS.S_p]
         + transition_map[COMPARTMENTS.R_pa, COMPARTMENTS.S_pa]
     )
 
-    group_dy[TRACKING_COMPARTMENTS.Waned_variant] = (
+    aggregates[AGGREGATES.Waned_variant] = (
         transition_map[COMPARTMENTS.R_variant, COMPARTMENTS.S_variant]
         + transition_map[COMPARTMENTS.R_variant_u, COMPARTMENTS.S_variant_u]
         + transition_map[COMPARTMENTS.R_variant_pa, COMPARTMENTS.S_variant_pa]
     )
 
-    # Proportion cross immune checks
-    group_dy[TRACKING_COMPARTMENTS.NewS_v] = (
-        transition_map[COMPARTMENTS.I2, COMPARTMENTS.S_variant]
-        + transition_map[COMPARTMENTS.I2_u,  COMPARTMENTS.S_variant_u]
-        + transition_map[COMPARTMENTS.I2_p, COMPARTMENTS.S_variant_u]
-        + transition_map[COMPARTMENTS.I2_pa, COMPARTMENTS.S_variant_pa]
+    aggregates[AGGREGATES.effective_vaccines] = (
+        vaccines_out[:, VACCINE_TYPES.p].sum()
+        + vaccines_out[:, VACCINE_TYPES.m].sum()
+        + vaccines_out[:, VACCINE_TYPES.pa].sum()
+        + vaccines_out[:, VACCINE_TYPES.ma].sum()
     )
 
-    group_dy[TRACKING_COMPARTMENTS.NewR_w] = (
-        transition_map[COMPARTMENTS.I2, COMPARTMENTS.R]
-        + transition_map[COMPARTMENTS.I2_u,  COMPARTMENTS.R_u]
-        + transition_map[COMPARTMENTS.I2_p, COMPARTMENTS.S_u]
-        + transition_map[COMPARTMENTS.I2_pa, COMPARTMENTS.S_u]
-    )
-
-    group_dy[TRACKING_COMPARTMENTS.V_u] = vaccines_out[:, VACCINE_TYPES.u].sum()
-    group_dy[TRACKING_COMPARTMENTS.V_p] = vaccines_out[:, VACCINE_TYPES.p].sum()
-    group_dy[TRACKING_COMPARTMENTS.V_m] = vaccines_out[:, VACCINE_TYPES.m].sum()
-    group_dy[TRACKING_COMPARTMENTS.V_pa] = vaccines_out[:, VACCINE_TYPES.pa].sum()
-    group_dy[TRACKING_COMPARTMENTS.V_ma] = vaccines_out[:, VACCINE_TYPES.ma].sum()
+    for target, compartments in AGG_MAP:
+        compartments_out = transition_map[compartments, :].sum()
+        compartments_in = transition_map[:, compartments].sum()
+        aggregates[target] = compartments_in - compartments_out
 
     if DEBUG:
-        assert np.all(np.isfinite(group_dy))
+        assert np.all(np.isfinite(aggregates))
 
-    return group_dy
+    return aggregates

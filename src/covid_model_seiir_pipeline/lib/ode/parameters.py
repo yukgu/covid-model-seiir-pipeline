@@ -6,60 +6,21 @@ import numpy as np
 
 from covid_model_seiir_pipeline.lib.ode.constants import (
     AGGREGATES,
-    AGG_MAP,
-    COMPARTMENTS,
     DEBUG,
     FIT_PARAMETERS,
     FORECAST_PARAMETERS,
     DISTRIBUTION_PARAMETERS,
-    INFECTIOUS_WILD,
-    INFECTIOUS_VARIANT,
-    N_GROUPS,
     NEW_E,
     WANED,
     PARAMETERS,
-    SUSCEPTIBLE_WILD,
-    SUSCEPTIBLE_VARIANT_ONLY,
-    REMOVED_WILD,
-    REMOVED_VARIANT,
 )
-
-
-@numba.njit
-def make_aggregates(y: np.ndarray, y_past: np.ndarray) -> np.ndarray:
-    """Make total system aggregates for use in group systems.
-
-    Parameters
-    ----------
-    y
-        The state of the full system on the last ODE iteration.
-    y_past
-
-    Returns
-    -------
-    aggregates
-        An array that with values that can be indexed by the AGGREGATES
-        index mapping.
-
-    """
-    aggregates = np.zeros((len(AGGREGATES), y_past.shape[1] + 1))
-
-    for target, compartments in AGG_MAP:
-#        for group_y_past in np.split(y_past, N_GROUPS):
-#            aggregates[target, :-1] = group_y_past[compartments, :].sum(axis=0)
-        for group_y in np.split(y, N_GROUPS):
-            aggregates[target, -1] = group_y[compartments].sum()
-
-    if DEBUG:
-        assert np.all(np.isfinite(aggregates))
-
-    return aggregates
 
 
 @numba.njit
 def normalize_parameters(input_parameters: np.ndarray,
                          dist_parameters: np.ndarray,
                          aggregates: np.ndarray,
+                         past_aggregates: np.ndarray,
                          forecast: bool) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Coerces all parameterizations of the ODE model to the same format.
 
@@ -76,6 +37,7 @@ def normalize_parameters(input_parameters: np.ndarray,
         An array that aligns with the :obj:`AGGREGATES` index mapping
         representing aggregates of the full ODE system like the total
         infectious population.
+    past_aggregates
     forecast
         The `input_parameters` are for the forecast if `True`, otherwise
         `input_parameters` are for the beta fit.
@@ -150,10 +112,12 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
-    #newR_wild = aggregates[AGGREGATES.removed_wild, 1:] - aggregates[AGGREGATES.removed_wild, :-1]
-    #newR_variant = aggregates[AGGREGATES.removed_variant, 1:] - aggregates[AGGREGATES.removed_variant, :-1]
-    waned[WANED.wild] = 0. #(newR_wild[::-1] * waning_dist[1:]).sum()
-    waned[WANED.variant] = 0. # (newR_variant[::-1] * waning_dist[1:]).sum()
+    wild_removed = np.hstack([past_aggregates[AGGREGATES.NewR_wild], aggregates[AGGREGATES.NewR_wild]])
+    variant_removed = np.hstack([past_aggregates[AGGREGATES.NewR_variant], aggregates[AGGREGATES.NewR_variant]])
+    newR_wild = wild_removed[1:] - wild_removed[:-1]
+    newR_variant = variant_removed[1:] - variant_removed[:-1]
+    waned[WANED.wild] = (newR_wild[::-1] * waning_dist[1:]).sum()
+    waned[WANED.variant] = (newR_variant[::-1] * waning_dist[1:]).sum()
 
     if DEBUG:
         assert np.all(np.isfinite(params))

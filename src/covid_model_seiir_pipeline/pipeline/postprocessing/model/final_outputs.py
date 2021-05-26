@@ -182,36 +182,11 @@ MEASURES = {
         cumulative_label='cumulative_vaccinations_effective_input',
         aggregator=aggregators.sum_aggregator,
     ),
-    'vaccines_immune_all': MeasureConfig(
-        loaders.load_vaccinations_immune_all,
-        'daily_vaccinations_all_immune',
-        aggregator=aggregators.sum_aggregator,
-    ),
-    'vaccines_immune_wild': MeasureConfig(
-        loaders.load_vaccinations_immune_wild,
-        'daily_vaccinations_wild_immune',
-        aggregator=aggregators.sum_aggregator,
-    ),
-    'vaccines_protected_all': MeasureConfig(
-        loaders.load_vaccinations_protected_all,
-        'daily_vaccinations_all_protected',
-        aggregator=aggregators.sum_aggregator,
-    ),
-    'vaccines_protected_wild': MeasureConfig(
-        loaders.load_vaccinations_protected_wild,
-        'daily_vaccinations_wild_protected',
-        aggregator=aggregators.sum_aggregator,
-    ),
     'vaccines_effective': MeasureConfig(
         loaders.load_vaccinations_effective,
         'daily_vaccinations_effective',
         calculate_cumulative=True,
         cumulative_label='cumulative_vaccinations_effective',
-        aggregator=aggregators.sum_aggregator,
-    ),
-    'vaccines_ineffective': MeasureConfig(
-        loaders.load_vaccinations_ineffective,
-        'daily_vaccinations_ineffective',
         aggregator=aggregators.sum_aggregator,
     ),
 

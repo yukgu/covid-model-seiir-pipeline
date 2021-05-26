@@ -125,9 +125,9 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
     }
     pop = sum(pop_groups.values())
 
-    all_compartments = list(ode.COMPARTMENTS._fields) + list(ode.TRACKING_COMPARTMENTS._fields)
-    system_size = len(all_compartments)
-    initial_condition = np.zeros(2*system_size)
+    all_group_compartments = list(ode.COMPARTMENTS._fields) + list(ode.TRACKING_COMPARTMENTS._fields)
+    aggregate_compartments = list(ode.AGGREGATES._fields)
+    initial_condition = np.zeros(len(pop_groups)*len(all_group_compartments) + len(aggregate_compartments))
     params = [ode_parameters.to_df().loc[:, list(ode.PARAMETERS._fields) + list(ode.FIT_PARAMETERS._fields)].values]
 
     for i, (risk_group, group_pop) in enumerate(pop_groups.items()):
@@ -137,7 +137,7 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
             total_pop=pop,
             alpha=ode_parameters.alpha[0],
             initial_condition=initial_condition,
-            offset=i * system_size,
+            offset=i * len(all_group_compartments),
         )
         params.append(
             ode_parameters.get_vaccinations(ode.VACCINE_TYPES._fields, risk_group)
@@ -152,10 +152,11 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
         params=params,
         dist_params=dist_params,
     )
+    compartments_by_group = [f'{compartment}_{risk_group}' for risk_group, compartment
+                             in itertools.product(pop_groups, all_group_compartments)]
     components = pd.DataFrame(
         data=result.T,
-        columns=[f'{compartment}_{risk_group}'
-                 for risk_group, compartment in itertools.product(pop_groups, all_compartments)],
+        columns=compartments_by_group + aggregate_compartments,
     )
     components['date'] = date
     components = components.set_index('date')
@@ -163,14 +164,12 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
     new_e_wild = components.filter(like='NewE_wild').sum(axis=1)
     new_e_variant = components.filter(like='NewE_variant').sum(axis=1)
 
-    s_wild_compartments = [f'{c}_{r}' for c, r in itertools.product(['S', 'S_u', 'S_p', 'S_pa'], pop_groups)]
-    s_wild = components.loc[:, s_wild_compartments].sum(axis=1)
-    s_variant_compartments = [f'{c}_{r}' for c, r
-                              in itertools.product(['S_variant', 'S_variant_u', 'S_variant_pa', 'S_m'], pop_groups)]
-    s_variant_only = components.loc[:, s_variant_compartments].sum(axis=1)
+    s_wild = components['susceptible_wild']
+    s_variant_only = components['susceptible_variant_only']
     s_variant = s_wild + s_variant_only
-    i_wild = components.loc[:, [c for c in components if c[0] == 'I' and 'variant' not in c]].sum(axis=1)
-    i_variant = components.loc[:, [c for c in components if c[0] == 'I' and 'variant' in c]].sum(axis=1)
+
+    i_wild = components['infectious_wild']
+    i_variant = components['infectious_variant']
 
     disease_density_wild = s_wild * i_wild**ode_parameters.alpha.values / pop
     beta_wild = (new_e_wild.diff() / disease_density_wild).reindex(full_index)

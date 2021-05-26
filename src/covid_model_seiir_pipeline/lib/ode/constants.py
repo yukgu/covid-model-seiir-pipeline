@@ -53,15 +53,6 @@ _Waned = namedtuple(
     ]
 )
 
-_Aggregates = namedtuple(
-    'Aggregates', [
-        'susceptible_wild', 'susceptible_variant_only',
-        'infectious_wild', 'infectious_variant',
-        'removed_wild', 'removed_variant',
-        'n_total',
-    ]
-)
-
 _VaccineTypes = namedtuple(
     'Vaccines', [
         'u', 'p', 'pa', 'm', 'ma',
@@ -87,11 +78,19 @@ _TrackingCompartments = namedtuple(
     'TrackingCompartments', [
         'NewE_wild', 'NewE_variant',
         'NewE_p_wild', 'NewE_p_variant',
+    ]
+)
+
+_Aggregates = namedtuple(
+    'Aggregates', [
         'NewE_nbt', 'NewE_vbt',
+        'NewR_wild', 'NewR_variant',
         'Waned_wild', 'Waned_variant',
-        'NewR', 'NewR_variant',
-        'NewS_v', 'NewR_w',
-        'V_u', 'V_p', 'V_pa', 'V_m', 'V_ma',
+        'effective_vaccines',
+
+        'susceptible_wild', 'susceptible_variant_only',
+        'infectious_wild', 'infectious_variant',
+        'n_total',
     ]
 )
 
@@ -111,12 +110,12 @@ DISTRIBUTION_PARAMETERS = _DistributionParameters(
 )
 NEW_E = _NewE(*list(range(len(_NewE._fields))))
 WANED = _Waned(*list(range(len(_Waned._fields))))
-AGGREGATES = _Aggregates(*list(range(len(_Aggregates._fields))))
 VACCINE_TYPES = _VaccineTypes(*list(range(len(_VaccineTypes._fields))))
 COMPARTMENTS = _Compartments(*list(range(len(_Compartments._fields))))
 TRACKING_COMPARTMENTS = _TrackingCompartments(*[
     i + len(COMPARTMENTS) for i in range(len(_TrackingCompartments._fields))
 ])
+AGGREGATES = _Aggregates(*list(range(len(_Aggregates._fields))))
 
 ##############################
 # Public component groupings #
@@ -164,8 +163,6 @@ AGG_MAP = (
     (AGGREGATES.susceptible_variant_only, SUSCEPTIBLE_VARIANT_ONLY),
     (AGGREGATES.infectious_wild, INFECTIOUS_WILD),
     (AGGREGATES.infectious_variant, INFECTIOUS_VARIANT),
-    (AGGREGATES.removed_wild, REMOVED_WILD),
-    (AGGREGATES.removed_variant, REMOVED_VARIANT),
     (AGGREGATES.n_total, np.array(COMPARTMENTS)),
 )
 

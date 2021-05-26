@@ -4,6 +4,7 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     FORECAST_PARAMETERS,
     COMPARTMENTS,
     TRACKING_COMPARTMENTS,
+    AGGREGATES,
     VACCINE_TYPES,
 )
 from covid_model_seiir_pipeline.lib.ode.system import (

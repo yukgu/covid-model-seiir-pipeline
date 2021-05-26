@@ -7,6 +7,7 @@ from covid_model_seiir_pipeline.lib import (
 from covid_model_seiir_pipeline.lib.ode.constants import (
     AGGREGATES,
     COMPARTMENTS,
+    TRACKING_COMPARTMENTS,
     DEBUG,
     N_GROUPS,
     NEW_E,
@@ -75,15 +76,18 @@ def _system(t: float,
         The change in `y` on the next ODE step.
 
     """
-    aggregates = parameters.make_aggregates(y, y_past)
+    system_size = len(y) - len(AGGREGATES) // N_GROUPS
+    past_aggregates = y_past[N_GROUPS * system_size:]
+    aggregates = y[N_GROUPS * system_size:]
+
     params, vaccines, new_e, waned = parameters.normalize_parameters(
         input_parameters,
         distribution_parameters,
+        past_aggregates,
         aggregates,
         forecast,
     )
 
-    system_size = len(y) // N_GROUPS
     dy = np.zeros_like(y)
     for i in range(N_GROUPS):
         group_start = i * system_size
@@ -94,12 +98,12 @@ def _system(t: float,
         group_y = y[group_start:group_end]
         group_vaccines = vaccines[group_vaccine_start:group_vaccine_end]
 
-        group_dy = _single_group_system(
+        group_dy, transition_map, vaccines_out = _single_group_system(
             t,
             group_y,
             new_e,
             waned,
-            aggregates[:, -1],
+            aggregates,
             params,
             group_vaccines,
         )
@@ -107,11 +111,15 @@ def _system(t: float,
         group_dy = escape_variant.maybe_invade(
             group_y,
             group_dy,
-            aggregates[:, -1],
+            aggregates,
             params,
         )
 
         dy[group_start:group_end] = group_dy
+        dy[N_GROUPS*system_size:] += accounting.compute_aggregates(
+            transition_map,
+            vaccines_out,
+        )
 
     if DEBUG:
         assert np.all(np.isfinite(dy))
@@ -275,7 +283,7 @@ def _single_group_system(t: float,
         vaccines_out,
     )
 
-    return group_dy
+    return group_dy, transition_map, vaccines_out
 
 
 @numba.njit

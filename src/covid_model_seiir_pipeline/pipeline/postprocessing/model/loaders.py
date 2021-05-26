@@ -115,28 +115,8 @@ def load_effectively_vaccinated(scenario: str, data_interface: 'PostprocessingDa
     return outputs
 
 
-def load_vaccinations_immune_all(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
-    return _load_output_data(scenario, 'vaccinations_immune_all', data_interface, num_cores)
-
-
-def load_vaccinations_immune_wild(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
-    return _load_output_data(scenario, 'vaccinations_immune_wild', data_interface, num_cores)
-
-
-def load_vaccinations_protected_all(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
-    return _load_output_data(scenario, 'vaccinations_protected_all', data_interface, num_cores)
-
-
-def load_vaccinations_protected_wild(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
-    return _load_output_data(scenario, 'vaccinations_protected_wild', data_interface, num_cores)
-
-
 def load_vaccinations_effective(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
     return _load_output_data(scenario, 'vaccinations_effective', data_interface, num_cores)
-
-
-def load_vaccinations_ineffective(scenario: str, data_interface: 'PostprocessingDataInterface', num_cores: int):
-    return _load_output_data(scenario, 'vaccinations_ineffective', data_interface, num_cores)
 
 
 ######################
