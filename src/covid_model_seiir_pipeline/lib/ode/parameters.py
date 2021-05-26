@@ -6,6 +6,7 @@ import numpy as np
 
 from covid_model_seiir_pipeline.lib.ode.constants import (
     AGGREGATES,
+    AGG_MAP,
     COMPARTMENTS,
     DEBUG,
     FIT_PARAMETERS,
@@ -43,19 +44,10 @@ def make_aggregates(y: np.ndarray, y_past: np.ndarray) -> np.ndarray:
     """
     aggregates = np.zeros((len(AGGREGATES), y_past.shape[1] + 1))
 
-    agg_map = (
-        (AGGREGATES.susceptible_wild, SUSCEPTIBLE_WILD),
-        (AGGREGATES.susceptible_variant_only, SUSCEPTIBLE_VARIANT_ONLY),
-        (AGGREGATES.infectious_wild, INFECTIOUS_WILD),
-        (AGGREGATES.infectious_variant, INFECTIOUS_VARIANT),
-        (AGGREGATES.removed_wild, REMOVED_WILD),
-        (AGGREGATES.removed_variant, REMOVED_VARIANT),
-        (AGGREGATES.n_total, np.array(COMPARTMENTS)),
-    )
-
-    for group_y, group_y_past in zip(np.split(y, N_GROUPS), np.split(y_past, N_GROUPS)):
-        for target, compartments in agg_map:
-            aggregates[target, :-1] = group_y_past[compartments, :].sum(axis=0)
+    for target, compartments in AGG_MAP:
+#        for group_y_past in np.split(y_past, N_GROUPS):
+#            aggregates[target, :-1] = group_y_past[compartments, :].sum(axis=0)
+        for group_y in np.split(y, N_GROUPS):
             aggregates[target, -1] = group_y[compartments].sum()
 
     if DEBUG:
@@ -158,10 +150,10 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
-    newR_wild = aggregates[AGGREGATES.removed_wild, 1:] - aggregates[AGGREGATES.removed_wild, :-1]
-    newR_variant = aggregates[AGGREGATES.removed_variant, 1:] - aggregates[AGGREGATES.removed_variant, :-1]
-    waned[WANED.wild] = (newR_wild[::-1] * waning_dist[1:]).sum()
-    waned[WANED.variant] = (newR_variant[::-1] * waning_dist[1:]).sum()
+    #newR_wild = aggregates[AGGREGATES.removed_wild, 1:] - aggregates[AGGREGATES.removed_wild, :-1]
+    #newR_variant = aggregates[AGGREGATES.removed_variant, 1:] - aggregates[AGGREGATES.removed_variant, :-1]
+    waned[WANED.wild] = 0. #(newR_wild[::-1] * waning_dist[1:]).sum()
+    waned[WANED.variant] = 0. # (newR_variant[::-1] * waning_dist[1:]).sum()
 
     if DEBUG:
         assert np.all(np.isfinite(params))

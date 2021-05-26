@@ -159,6 +159,16 @@ REMOVED_VARIANT = np.array([
 ##########################
 
 N_GROUPS = 2
+AGG_MAP = (
+    (AGGREGATES.susceptible_wild, SUSCEPTIBLE_WILD),
+    (AGGREGATES.susceptible_variant_only, SUSCEPTIBLE_VARIANT_ONLY),
+    (AGGREGATES.infectious_wild, INFECTIOUS_WILD),
+    (AGGREGATES.infectious_variant, INFECTIOUS_VARIANT),
+    (AGGREGATES.removed_wild, REMOVED_WILD),
+    (AGGREGATES.removed_variant, REMOVED_VARIANT),
+    (AGGREGATES.n_total, np.array(COMPARTMENTS)),
+)
+
 
 # Turning off the JIT is operationally 1-to-1 with
 # saying something is broken in the ODE code and

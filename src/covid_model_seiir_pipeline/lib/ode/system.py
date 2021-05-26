@@ -84,7 +84,7 @@ def _system(t: float,
     )
 
     system_size = len(y) // N_GROUPS
-    dy = np.zeros_like(y[:, -1])
+    dy = np.zeros_like(y)
     for i in range(N_GROUPS):
         group_start = i * system_size
         group_end = (i + 1) * system_size
