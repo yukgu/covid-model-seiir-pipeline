@@ -11,8 +11,10 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
 
 
 @numba.njit
-def maybe_invade(group_y: np.ndarray, group_dy: np.ndarray,
-                 aggregates: np.ndarray, params: np.ndarray) -> np.ndarray:
+def maybe_invade(group_y: np.ndarray,
+                 aggregates: np.ndarray,
+                 params: np.ndarray,
+                 transition_map: np.ndarray) -> np.ndarray:
     """Cause escape variants to invade if the criteria is correct.
 
     Parameters
@@ -21,16 +23,13 @@ def maybe_invade(group_y: np.ndarray, group_dy: np.ndarray,
         The state of the group system on the last ODE step. The first
         elements in this array align with the :obj:`COMPARTMENTS` index
         map.
-    group_dy
-        The change in the state of the group system on this ODE step as
-        computed by the ode system. The first elements in this array align
-        with the :obj:`COMPARTMENTS` index map.
     aggregates
         An array that aligns with the :obj:`AGGREGATES` index map representing
         total system aggregates like the total infectious subpopulation.
     params
         An array that aligns with the :obj:`PARAMETERS` index map representing
         the standard set of ODE parameters.
+    transition_map
 
     Returns
     -------
@@ -43,42 +42,47 @@ def maybe_invade(group_y: np.ndarray, group_dy: np.ndarray,
     no_variant_present = params[PARAMETERS.rho_variant] < 0.01
     already_invaded = aggregates[AGGREGATES.infectious_variant] > 0.0
     if no_variant_present or already_invaded:
-        return group_dy
+        return transition_map
 
     alpha, pi = params[PARAMETERS.alpha], params[PARAMETERS.pi]
 
-    group_dy = _invade_compartment_subset(
-        group_y, group_dy,
+    transition_map = _invade_compartment_subset(
+        group_y,
         alpha, pi,
         COMPARTMENTS.S, COMPARTMENTS.E,
         COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant,
+        transition_map,
     )
-    group_dy = _invade_compartment_subset(
-        group_y, group_dy,
+    transition_map = _invade_compartment_subset(
+        group_y,
         alpha, pi,
         COMPARTMENTS.S_u, COMPARTMENTS.E_u,
         COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
+        transition_map,
     )
-    group_dy = _invade_compartment_subset(
-        group_y, group_dy,
+    transition_map = _invade_compartment_subset(
+        group_y,
         alpha, pi,
         COMPARTMENTS.S_p, COMPARTMENTS.E_p,
         COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
+        transition_map,
     )
-    group_dy = _invade_compartment_subset(
-        group_y, group_dy,
+    transition_map = _invade_compartment_subset(
+        group_y,
         alpha, pi,
         COMPARTMENTS.S_pa, COMPARTMENTS.E_pa,
         COMPARTMENTS.E_variant_pa, COMPARTMENTS.I1_variant_pa,
+        transition_map,
     )
-    return group_dy
+    return transition_map
 
 
 @numba.njit
-def _invade_compartment_subset(group_y: np.ndarray, group_dy: np.ndarray,
+def _invade_compartment_subset(group_y: np.ndarray,
                                alpha: float, pi: float,
                                susceptible: int, exposed: int,
-                               exposed_variant: int, infectious1_variant: int) -> np.ndarray:
+                               exposed_variant: int, infectious1_variant: int,
+                               transition_map: np.ndarray) -> np.ndarray:
     """Shift a small set of folks to the escape variant compartments."""
     # Shift at least 1 person to the escape variants if we can
     min_invasion = 1
@@ -89,11 +93,10 @@ def _invade_compartment_subset(group_y: np.ndarray, group_dy: np.ndarray,
 
     # Set the boundary condition so that the initial beta for the escape
     # variant starts at 5 (for consistency with ancestral type invasion).
-    group_dy[susceptible] -= delta + (delta / 5)**(1 / alpha)
-    group_dy[exposed_variant] += delta
-    group_dy[infectious1_variant] += (delta / 5)**(1 / alpha)
+    transition_map[susceptible, exposed_variant] += delta
+    transition_map[susceptible, infectious1_variant] += (delta / 5)**(1 / alpha)
 
     if DEBUG:
-        assert np.all(np.isfinite(group_dy))
+        assert np.all(np.isfinite(transition_map))
 
-    return group_dy
+    return transition_map

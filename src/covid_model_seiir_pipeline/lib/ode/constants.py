@@ -144,7 +144,7 @@ INFECTIOUS_WILD = np.array([
 INFECTIOUS_VARIANT = np.array([
     COMPARTMENTS.I1_variant,    COMPARTMENTS.I2_variant,
     COMPARTMENTS.I1_variant_u,  COMPARTMENTS.I2_variant_u,
-    COMPARTMENTS.I2_variant_pa, COMPARTMENTS.I2_variant_pa,
+    COMPARTMENTS.I1_variant_pa, COMPARTMENTS.I2_variant_pa,
 ])
 REMOVED_WILD = np.array([
     COMPARTMENTS.R, COMPARTMENTS.R_u, COMPARTMENTS.R_p, COMPARTMENTS.R_pa,

@@ -108,13 +108,6 @@ def _system(t: float,
             group_vaccines,
         )
 
-        group_dy = escape_variant.maybe_invade(
-            group_y,
-            group_dy,
-            aggregates,
-            params,
-        )
-
         dy[group_start:group_end] = group_dy
         dy[N_GROUPS*system_size:] += accounting.compute_aggregates(
             transition_map,
@@ -266,6 +259,13 @@ def _single_group_system(t: float,
     transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa] = math.safe_divide(
         new_e[NEW_E.variant_reinf] * group_y[COMPARTMENTS.S_m],
         aggregates[AGGREGATES.susceptible_variant_only],
+    )
+
+    group_dy = escape_variant.maybe_invade(
+        group_y,
+        group_dy,
+        aggregates,
+        params,
     )
 
     inflow = transition_map.sum(axis=0)
