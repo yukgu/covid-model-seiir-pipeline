@@ -145,7 +145,7 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
 
     params = np.hstack(params).T
     dist_params = [get_waning_dist(ode_parameters)]
-    result = math.solve_dde(
+    result, *_ = math.solve_dde(
         system=ode.fit_system,
         t=t,
         init_cond=initial_condition,
