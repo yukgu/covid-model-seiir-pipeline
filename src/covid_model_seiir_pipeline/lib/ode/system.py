@@ -76,15 +76,15 @@ def _system(t: float,
         The change in `y` on the next ODE step.
 
     """
-    system_size = len(y) - len(AGGREGATES) // N_GROUPS
+    system_size = (len(y) - len(AGGREGATES)) // N_GROUPS
     past_aggregates = y_past[N_GROUPS * system_size:]
     aggregates = y[N_GROUPS * system_size:]
 
     params, vaccines, new_e, waned = parameters.normalize_parameters(
         input_parameters,
         distribution_parameters,
-        past_aggregates,
         aggregates,
+        past_aggregates,
         forecast,
     )
 

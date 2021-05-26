@@ -64,16 +64,16 @@ def normalize_parameters(input_parameters: np.ndarray,
         params = params[np.array(PARAMETERS)]
 
         b_wild = (
-            beta_wild * aggregates[AGGREGATES.infectious_wild, -1]**alpha / aggregates[AGGREGATES.n_total, -1]
+            beta_wild * aggregates[AGGREGATES.infectious_wild]**alpha / aggregates[AGGREGATES.n_total]
         )
         b_variant = (
-            beta_variant * aggregates[AGGREGATES.infectious_variant, -1]**alpha / aggregates[AGGREGATES.n_total, -1]
+            beta_variant * aggregates[AGGREGATES.infectious_variant]**alpha / aggregates[AGGREGATES.n_total]
         )
 
         new_e = np.zeros(len(NEW_E))
-        new_e[NEW_E.wild] = b_wild * aggregates[AGGREGATES.susceptible_wild, -1]
-        new_e[NEW_E.variant_naive] = b_variant * aggregates[AGGREGATES.susceptible_wild, -1]
-        new_e[NEW_E.variant_reinf] = b_variant * aggregates[AGGREGATES.susceptible_variant_only, -1]
+        new_e[NEW_E.wild] = b_wild * aggregates[AGGREGATES.susceptible_wild]
+        new_e[NEW_E.variant_naive] = b_variant * aggregates[AGGREGATES.susceptible_wild]
+        new_e[NEW_E.variant_reinf] = b_variant * aggregates[AGGREGATES.susceptible_variant_only]
         new_e[NEW_E.total] = new_e.sum()
 
     else:
@@ -96,7 +96,7 @@ def normalize_parameters(input_parameters: np.ndarray,
             AGGREGATES.susceptible_wild, AGGREGATES.susceptible_variant_only,
             AGGREGATES.infectious_wild, AGGREGATES.infectious_variant,
             AGGREGATES.n_total,
-        ]), -1]
+        ])]
 
         si_wild = susceptible_wild * infectious_wild ** alpha
         si_variant_naive = scale * susceptible_wild * infectious_variant ** alpha
