@@ -80,7 +80,7 @@ def compute_tracking_columns(group_dy: np.ndarray,
 
 
 def compute_aggregates(transition_map: np.ndarray, vaccines_out: np.ndarray):
-    aggregates = np.zeros_like(AGGREGATES, dtype=np.float)
+    aggregates = np.zeros(len(AGGREGATES))
     # New variant type infections breaking through natural immunity
     aggregates[AGGREGATES.NewE_nbt] = (
         transition_map[COMPARTMENTS.S_variant, COMPARTMENTS.E_variant]
