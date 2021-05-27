@@ -2,6 +2,11 @@ import numba
 import numpy as np
 import pandas as pd
 
+from covid_model_seiir_pipeline.lib.ode.timer import (
+    RESULTS,
+    clear_results,
+)
+
 
 SOLVER_DT = 0.1
 
@@ -151,6 +156,8 @@ def rk45_dde(system,
         )
         y_solve[:, i] = y_solve[:, i - 2] + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
 
+    print(RESULTS)
+    clear_results()
     return y_solve
 
 
