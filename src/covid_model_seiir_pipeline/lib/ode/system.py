@@ -14,6 +14,9 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     WANED,
     PARAMETERS,
     VACCINE_TYPES,
+    SUSCEPTIBLE_WILD,
+    INFECTIOUS_WILD,
+    INFECTIOUS_VARIANT,
 )
 from covid_model_seiir_pipeline.lib.ode import (
     accounting,
@@ -80,6 +83,10 @@ def _system(t: float,
     past_aggregates = y_past[N_GROUPS * system_size:]
     aggregates = y[N_GROUPS * system_size:]
 
+#    assert np.isclose(y[SUSCEPTIBLE_WILD].sum() + y[system_size + SUSCEPTIBLE_WILD].sum(), aggregates[AGGREGATES.susceptible_wild])
+#    assert np.isclose(y[INFECTIOUS_WILD].sum() + y[system_size + INFECTIOUS_WILD].sum(), aggregates[AGGREGATES.infectious_wild])
+#    assert np.isclose(y[INFECTIOUS_VARIANT].sum() + y[system_size + INFECTIOUS_VARIANT].sum(), aggregates[AGGREGATES.infectious_variant])
+
     params, vaccines, new_e, waned = parameters.normalize_parameters(
         input_parameters,
         distribution_parameters,
@@ -113,9 +120,10 @@ def _system(t: float,
             transition_map,
             vaccines_out,
         )
-
+    
     if DEBUG:
         assert np.all(np.isfinite(dy))
+        assert np.all(y + dy > -1e-10)
 
     return dy
 
@@ -263,9 +271,9 @@ def _single_group_system(t: float,
 
     group_dy = escape_variant.maybe_invade(
         group_y,
-        group_dy,
         aggregates,
         params,
+        transition_map,
     )
 
     inflow = transition_map.sum(axis=0)

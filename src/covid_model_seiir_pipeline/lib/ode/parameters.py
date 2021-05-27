@@ -112,8 +112,8 @@ def normalize_parameters(input_parameters: np.ndarray,
 
     waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
-    wild_removed = np.hstack([past_aggregates[AGGREGATES.NewR_wild], aggregates[AGGREGATES.NewR_wild]])
-    variant_removed = np.hstack([past_aggregates[AGGREGATES.NewR_variant], aggregates[AGGREGATES.NewR_variant]])
+    wild_removed = np.append(past_aggregates[AGGREGATES.NewR_wild], aggregates[AGGREGATES.NewR_wild])
+    variant_removed = np.append(past_aggregates[AGGREGATES.NewR_variant], aggregates[AGGREGATES.NewR_variant])
     newR_wild = wild_removed[1:] - wild_removed[:-1]
     newR_variant = variant_removed[1:] - variant_removed[:-1]
     waned[WANED.wild] = (newR_wild[::-1] * waning_dist[1:]).sum()
