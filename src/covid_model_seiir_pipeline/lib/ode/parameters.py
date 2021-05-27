@@ -110,17 +110,14 @@ def normalize_parameters(input_parameters: np.ndarray,
         new_e[NEW_E.variant_reinf] = si_variant_reinf / z * new_e_total
         new_e[NEW_E.total] = new_e_total
 
+    waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
-    waned[WANED.wild] = compute_waned(
-        dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time],
-        past_aggregates[AGGREGATES.NewR_wild],
-        aggregates[AGGREGATES.NewR_wild],
-    )
-    waned[WANED.variant] = compute_waned(
-        dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time],
-        past_aggregates[AGGREGATES.NewR_variant],
-        aggregates[AGGREGATES.NewR_variant],
-    )
+    wild_removed = np.append(past_aggregates[AGGREGATES.NewR_wild], aggregates[AGGREGATES.NewR_wild])
+    variant_removed = np.append(past_aggregates[AGGREGATES.NewR_variant], aggregates[AGGREGATES.NewR_variant])
+    newR_wild = wild_removed[1:] - wild_removed[:-1]
+    newR_variant = variant_removed[1:] - variant_removed[:-1]
+    waned[WANED.wild] = (newR_wild[::-1] * waning_dist[1:]).sum()
+    waned[WANED.variant] = (newR_variant[::-1] * waning_dist[1:]).sum()
 
     if DEBUG:
         assert np.all(np.isfinite(params))
@@ -128,11 +125,3 @@ def normalize_parameters(input_parameters: np.ndarray,
         assert np.all(np.isfinite(new_e))
 
     return params, vaccines, new_e, waned
-
-
-@numba.njit
-def compute_waned(waning_dist: np.ndarray, removed: np.ndarray, removed_last: float):
-    out = (removed_last - removed[-1]) * waning_dist[0]
-    for i in np.arange(removed.size - 1, 0, -1):
-        out += (removed[i] - removed[i-1]) * waning_dist[waning_dist.size-i]
-    return out
