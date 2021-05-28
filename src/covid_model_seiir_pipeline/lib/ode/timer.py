@@ -1,6 +1,4 @@
-from numba import njit, objmode
-from numba.core import types
-from numba.typed import Dict
+from numba import njit
 import numpy as np
 import ctypes
 
@@ -20,33 +18,3 @@ def timenow():
     ts = timespec[0]
     tns = timespec[1]
     return np.float64(ts) + 1e-9 * np.float64(tns)
-
-
-START = Dict.empty(
-    key_type=types.unicode_type,
-    value_type=types.float64,
-)
-
-RESULTS = Dict.empty(
-    key_type=types.unicode_type,
-    value_type=types.float64,
-)
-
-
-@njit
-def log_start(name):
-    START[name] = timenow()
-
-
-@njit
-def log_end(name):
-    assert name in START
-    if name in RESULTS:
-        RESULTS[name] += timenow() - START[name]
-    else:
-        RESULTS[name] = timenow() - START[name]
-
-@njit
-def clear_results():
-    for name in RESULTS:
-        del RESULTS[name]
