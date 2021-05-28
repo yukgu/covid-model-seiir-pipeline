@@ -43,7 +43,8 @@ def build_model_parameters(indices: Indices,
     # These are all the same by draw.  Just broadcasting them over a new index.
     ode_params = {
         param: pd.Series(ode_parameters[param].mean(), index=indices.full, name=param)
-        for param in ['alpha', 'sigma', 'gamma1', 'gamma2', 'pi', 'chi']
+        for param in ['alpha', 'sigma', 'gamma1', 'gamma2', 'pi', 'chi',
+                      'waning_start', 'waning_mean', 'waning_sd']
     }
 
     beta, beta_wild, beta_variant, beta_hat, rho, rho_variant, rho_b1617, rho_total = get_betas_and_prevalences(
@@ -248,6 +249,9 @@ def run_ode_model(initial_conditions: pd.DataFrame,
            model_parameters.immune_all_types_hr],
         axis=1
     )
+    dist_parameters = pd.concat(
+        [mp_dict[p] for p in ['waning_start', 'waning_mean', 'waning_sd']]
+    )
 
     forecasts = []
     initial_conditions_iter = tqdm.tqdm(initial_conditions.iterrows(),
@@ -260,12 +264,14 @@ def run_ode_model(initial_conditions: pd.DataFrame,
 
         ic = initial_condition.values
         p = loc_parameters.values.T  # Each row is a param, each column a day
+        dist_params = [math.get_waning_dist(dist_parameters.loc[location_id])]
 
-        solution = math.solve_ode(
+        solution = math.solve_dde(
             system=ode.forecast_system,
             t=loc_times,
             init_cond=ic,
-            params=p
+            params=p,
+            dist_params=dist_params,
         )
 
         result = pd.DataFrame(

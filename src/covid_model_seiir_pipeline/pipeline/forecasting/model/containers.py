@@ -113,6 +113,11 @@ class ModelParameters:
     immune_wild_type_hr: pd.Series
     immune_all_types_hr: pd.Series
 
+    # Waning parameters
+    waning_start: pd.Series
+    waning_mean: pd.Series
+    waning_sd: pd.Series
+
     def with_index(self, index: pd.MultiIndex):
         return ModelParameters(**{
             parameter_name: parameter.loc[index] for parameter_name, parameter in self.to_dict().items()
@@ -159,18 +164,12 @@ class SystemMetrics:
     variant_prevalence: pd.Series
     natural_immunity_breakthrough: pd.Series
     vaccine_breakthrough: pd.Series
-    proportion_cross_immune: pd.Series
 
     modeled_deaths_wild: pd.Series
     modeled_deaths_variant: pd.Series
     modeled_deaths_total: pd.Series
 
-    vaccinations_protected_wild: pd.Series
-    vaccinations_protected_all: pd.Series
-    vaccinations_immune_wild: pd.Series
-    vaccinations_immune_all: pd.Series
     vaccinations_effective: pd.Series
-    vaccinations_ineffective: pd.Series
 
     total_susceptible_wild: pd.Series
     total_susceptible_variant: pd.Series

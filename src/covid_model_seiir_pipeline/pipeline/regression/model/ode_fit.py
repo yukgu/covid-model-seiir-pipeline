@@ -3,7 +3,6 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-import scipy.stats
 import tqdm
 
 from covid_model_seiir_pipeline.lib import (
@@ -153,7 +152,7 @@ def run_loc_ode_fit(ode_parameters: ODEParameters) -> pd.DataFrame:
         )
 
     params = np.hstack(params).T
-    dist_params = [get_waning_dist(ode_parameters)]
+    dist_params = [math.get_waning_dist(ode_parameters)]
     result, *_ = math.solve_dde(
         system=ode.fit_system,
         t=t,
@@ -227,10 +226,3 @@ def filter_to_epi_threshold(infections: pd.Series,
             start_date = infections.index.min()
             break
     return infections.loc[start_date:]
-
-
-def get_waning_dist(ode_parameters: ODEParameters):
-    start = ode_parameters.waning_start.mean()
-    mean = ode_parameters.waning_mean.mean()
-    var = ode_parameters.waning_sd.mean()**2
-    return scipy.stats.gamma(loc=start, scale=var/mean, a=mean**2/var)
