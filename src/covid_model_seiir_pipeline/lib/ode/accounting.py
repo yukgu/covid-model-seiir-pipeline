@@ -11,10 +11,6 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     TRACKING_COMPARTMENTS,
     VACCINE_TYPES,
 )
-from covid_model_seiir_pipeline.lib.ode.timer import (
-    log_start,
-    log_end,
-)
 
 
 @numba.njit
@@ -50,7 +46,6 @@ def compute_tracking_columns(group_dy: np.ndarray,
         step).
 
     """
-    log_start('compute_tracking_columns')
     # New wild type infections
     group_dy[TRACKING_COMPARTMENTS.NewE_wild] = (
         transition_map[COMPARTMENTS.S, COMPARTMENTS.E]
@@ -80,13 +75,11 @@ def compute_tracking_columns(group_dy: np.ndarray,
         + transition_map[COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa]
         + transition_map[COMPARTMENTS.S_m, COMPARTMENTS.E_variant_pa]
     )
-    log_end('compute_tracking_columns')
     return group_dy
 
 
 @numba.njit
 def compute_aggregates(transition_map: np.ndarray, vaccines_out: np.ndarray):
-    log_start('compute_aggregates')
     aggregates = np.zeros(len(AGGREGATES))
     # New variant type infections breaking through natural immunity
     aggregates[AGGREGATES.NewE_nbt] = (
@@ -121,14 +114,11 @@ def compute_aggregates(transition_map: np.ndarray, vaccines_out: np.ndarray):
         + vaccines_out[:, VACCINE_TYPES.pa].sum()
         + vaccines_out[:, VACCINE_TYPES.ma].sum()
     )
-    log_end('compute_aggregates')
 
-    log_start('compute_summary_aggregates')
     for target, compartments in AGG_MAP:
         compartments_out = transition_map[compartments, :].sum()
         compartments_in = transition_map[:, compartments].sum()
         aggregates[target] = compartments_in - compartments_out
-    log_start('compute_summary_aggregates')
 
     if DEBUG:
         assert np.all(np.isfinite(aggregates))

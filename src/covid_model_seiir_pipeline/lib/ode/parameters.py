@@ -14,6 +14,9 @@ from covid_model_seiir_pipeline.lib.ode.constants import (
     WANED,
     PARAMETERS,
 )
+from covid_model_seiir_pipeline.lib.ode import (
+    timer,
+)
 
 
 @numba.njit
@@ -77,6 +80,7 @@ def normalize_parameters(input_parameters: np.ndarray,
         new_e[NEW_E.total] = new_e.sum()
 
     else:
+#        start = timer.timenow()
         param_size = len(PARAMETERS) + len(FIT_PARAMETERS)
         params, vaccines = input_parameters[:param_size], input_parameters[param_size:]
 
@@ -109,7 +113,10 @@ def normalize_parameters(input_parameters: np.ndarray,
         new_e[NEW_E.variant_naive] = si_variant_naive / z * new_e_total
         new_e[NEW_E.variant_reinf] = si_variant_reinf / z * new_e_total
         new_e[NEW_E.total] = new_e_total
+#        end = timer.timenow()
+#        print('Normal normalization: ', end - start)
 
+#    start = timer.timenow()
     waning_dist = dist_parameters[DISTRIBUTION_PARAMETERS.waning_immunity_time]
     waned = np.zeros(len(WANED))
     wild_removed = np.append(past_aggregates[AGGREGATES.NewR_wild], aggregates[AGGREGATES.NewR_wild])
@@ -118,6 +125,8 @@ def normalize_parameters(input_parameters: np.ndarray,
     newR_variant = variant_removed[1:] - variant_removed[:-1]
     waned[WANED.wild] = (newR_wild[::-1] * waning_dist[1:]).sum()
     waned[WANED.variant] = (newR_variant[::-1] * waning_dist[1:]).sum()
+#    end = timer.timenow()
+#    print('Waning: ', end - start)
 
     if DEBUG:
         assert np.all(np.isfinite(params))

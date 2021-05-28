@@ -88,7 +88,7 @@ def _system(t: float,
 #    assert np.isclose(y[INFECTIOUS_WILD].sum() + y[system_size + INFECTIOUS_WILD].sum(), aggregates[AGGREGATES.infectious_wild])
 #    assert np.isclose(y[INFECTIOUS_VARIANT].sum() + y[system_size + INFECTIOUS_VARIANT].sum(), aggregates[AGGREGATES.infectious_variant])
 
-    start = timer.timenow()
+#    start = timer.timenow()
     params, vaccines, new_e, waned = parameters.normalize_parameters(
         input_parameters,
         distribution_parameters,
@@ -96,8 +96,8 @@ def _system(t: float,
         past_aggregates,
         forecast,
     )
-    end = timer.timenow()
-    print('Normalize parameters: ', end - start)
+#    end = timer.timenow()
+#    print('Normalize parameters: ', end - start)
 
     dy = np.zeros_like(y)
     for i in range(N_GROUPS):
@@ -109,7 +109,7 @@ def _system(t: float,
         group_y = y[group_start:group_end]
         group_vaccines = vaccines[group_vaccine_start:group_vaccine_end]
 
-        start = timer.timenow()
+#        start = timer.timenow()
         group_dy, transition_map, vaccines_out = _single_group_system(
             t,
             group_y,
@@ -119,17 +119,17 @@ def _system(t: float,
             params,
             group_vaccines,
         )
-        end = timer.timenow()
-        print('System: ', end - start)
+#        end = timer.timenow()
+#        print('System: ', end - start)
 
         dy[group_start:group_end] = group_dy
-        start = timer.timenow()
+#        start = timer.timenow()
         dy[N_GROUPS*system_size:] += accounting.compute_aggregates(
             transition_map,
             vaccines_out,
         )
-        end = timer.timenow()
-        print('Aggregates: ', end - start)
+#        end = timer.timenow()
+#        print('Aggregates: ', end - start)
 
     if DEBUG:
         assert np.all(np.isfinite(dy))
