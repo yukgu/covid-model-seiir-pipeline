@@ -50,5 +50,66 @@ write.csv(scen_mask, mask_out_path, row.names = F)
 vaccine_coverage_path <- "/ihme/covid-19-2/vaccine-coverage/best/slow_scenario_vaccine_coverage.csv"
 vaccine_dt <- fread(vaccine_coverage_path)
 names(vaccine_dt)
-us_dt <- vaccine_dt[location_id %in% 523:573, c("location_id", "date", grep("_effective_protected", names(vaccine_dt), value = T)), with = F]
+us_dt <- vaccine_dt[location_id %in% 523:573, c("location_id", "date", "over65_population", "under65_population", grep(".*r_vaccinated", names(vaccine_dt), value = T)), with = F]
 # TODO: This needs to be augmented to scale up to 95% in each bin, retaining state proportions, to bring the national coverage to 83%
+dt <- as.data.table(rbind(
+  us_dt[, .(location_id, date, under65_population, lr_vaccinated)] %>%
+    setnames(., c("under65_population", "lr_vaccinated"),
+      c("population", "protected")) %>%
+      mutate(group = "lr"),
+  us_dt[, .(location_id, date, over65_population, hr_vaccinated)] %>%
+    setnames(., c("over65_population", "hr_vaccinated"),
+      c("population", "protected")) %>%
+      mutate(group = "hr")
+))
+dt[, cum_protected := cumsum(protected), by = .(location_id, group)]
+dt[, coverage := cum_protected / population]
+
+logit <- function(x) log(x / (1 - x))
+ilogit <- function(x) exp(x) / (1 + exp(x))
+
+obj_fun <- function(k, props, weights, target, cap) {
+  shifted_props <- ilogit(logit(props) + k) * cap 
+  w_mean <- weighted.mean(shifted_props, weights)
+  return((target - w_mean)**2)
+}
+
+logit_shift <- function(props, k, cap) {
+  ilogit(logit(props) + k) * cap
+}
+
+logit_rake <- function(props, weights, target, cap) {
+  sol <- optimize(
+    obj_fun, 
+    interval = c(-1, 1) * 1e2,
+    props = props, weights = weights, target = target, cap = cap
+  )
+  k <- sol$minimum
+  opt_shifted_props <- logit_shift(props, k, cap)
+  return(list(opt_shifted_props, k))
+}
+
+date_dt <- dt[date == "2021-10-31"]
+target = 0.83
+cap = 0.95
+raked_props <- logit_rake(date_dt$coverage, date_dt$population, target, cap)
+
+weighted.mean(raked_props[[1]], date_dt$population)
+
+dt[, raked_coverage := logit_shift(coverage, raked_props[[2]], cap)]
+dt[, date := as.Date(date)]
+dt[, c("protected", "cum_protected") := NULL]
+melt_dt <- melt(dt, id.vars = c("location_id", "date", "group", "population"))
+
+date_dt <- dt[date == "2021-10-31"]
+weighted.mean(date_dt$raked_coverage, date_dt$population)
+
+library(ggplot2)
+plot_dt <- melt_dt[location_id == 555]
+pdf("/homes/aucarter/Downloads/raked_coverage.pdf", height = 20, width = 9)
+gg <- ggplot(melt_dt, aes(x = date, y = value, linetype = group, color = variable)) + 
+  geom_line() + facet_wrap(~location_id, nrow = 10) + 
+  theme(legend.position = "bottom") +
+  geom_hline(yintercept = 0.95, col = "red") + ylim(c(0, 1))
+print(gg)
+dev.off()
