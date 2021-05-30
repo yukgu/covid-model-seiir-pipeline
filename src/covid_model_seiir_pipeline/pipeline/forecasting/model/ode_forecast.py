@@ -250,7 +250,8 @@ def run_ode_model(initial_conditions: pd.DataFrame,
         axis=1
     )
     dist_parameters = pd.concat(
-        [mp_dict[p] for p in ['waning_start', 'waning_mean', 'waning_sd']]
+        [mp_dict[p] for p in ['waning_start', 'waning_mean', 'waning_sd']],
+        axis=1,
     )
 
     forecasts = []
@@ -275,7 +276,7 @@ def run_ode_model(initial_conditions: pd.DataFrame,
         )
 
         result = pd.DataFrame(
-            data=solution.T,
+            data=solution[0].T,
             columns=initial_conditions.columns.tolist()
         )
         result['date'] = loc_date
