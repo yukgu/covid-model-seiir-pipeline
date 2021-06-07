@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, NamedTuple, Tuple
 
+from covid_shared import workflow
+
 from covid_model_seiir_pipeline.lib import (
     utilities,
-    workflow,
 )
 
 
@@ -78,7 +79,7 @@ class SplicingSpecification:
 class AggregationSpecification:
     """Specifies hierarchy and parameters for aggregation."""
     location_file: str = field(default='')
-    location_set_id: int = field(default=None)
+    location_set_id: None = None
     location_set_version_id: int = field(default=None)
 
     def to_dict(self) -> Dict:
