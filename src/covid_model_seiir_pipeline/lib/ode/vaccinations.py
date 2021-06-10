@@ -88,19 +88,19 @@ def allocate(group_y: np.ndarray,
         n_vaccines_group, n_unvaccinated_group,
         vaccines_out,
     )
-    # Folks in E, I1, I2, R only unprotected.
+    # Folks in E, I, R only unprotected.
     vaccines_out = _allocate_from_not_s(
         group_y,
         params,
         n_vaccines_group, n_unvaccinated_group,
-        COMPARTMENTS.E, COMPARTMENTS.I1, COMPARTMENTS.I2, COMPARTMENTS.R,
+        COMPARTMENTS.E, COMPARTMENTS.I, COMPARTMENTS.R,
         vaccines_out,
     )
     vaccines_out = _allocate_from_not_s(
         group_y,
         params,
         n_vaccines_group, n_unvaccinated_group,
-        COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant, COMPARTMENTS.I2_variant, COMPARTMENTS.R_variant,
+        COMPARTMENTS.E_variant, COMPARTMENTS.I_variant, COMPARTMENTS.R_variant,
         vaccines_out,
     )
 
@@ -173,13 +173,12 @@ def _allocate_from_s_variant(group_y: np.ndarray,
 def _allocate_from_not_s(group_y: np.ndarray,
                          params: np.ndarray,
                          v_total: float, n_unvaccinated: float,
-                         exposed: int, infectious1: int, infectious2: int, removed: int,
+                         exposed: int, infectious: int, removed: int,
                          vaccines_out: np.ndarray) -> np.ndarray:
     """Allocate vaccine effectiveness among active infections."""
     param_map = (
         (exposed, params[PARAMETERS.sigma]),
-        (infectious1, params[PARAMETERS.gamma1]),
-        (infectious2, params[PARAMETERS.gamma2]),
+        (infectious, params[PARAMETERS.gamma]),
     )
 
     for compartment, param in param_map:

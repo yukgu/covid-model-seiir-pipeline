@@ -40,7 +40,7 @@ def run_beta_fit(fit_version: str, scenario: str, draw_id: int, progress_bar: bo
     np.random.seed(draw_id)
     sampled_params = sample_params(
         infections.index, fit_params,
-        params_to_sample=['alpha', 'sigma', 'gamma1', 'gamma2', 'kappa', 'phi', 'pi', 'chi']
+        params_to_sample=['alpha', 'sigma', 'gamma', 'kappa', 'phi', 'pi', 'chi']
     )
     ode_parameters = prepare_ode_fit_parameters(
         infections,
@@ -48,7 +48,6 @@ def run_beta_fit(fit_version: str, scenario: str, draw_id: int, progress_bar: bo
         rhos,
         vaccinations,
         sampled_params,
-        draw_id,
     )
 
     logger.info('Running ODE fit', context='compute_ode')

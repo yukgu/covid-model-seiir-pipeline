@@ -42,7 +42,7 @@ def build_model_parameters(indices: Indices,
     # These are all the same by draw.  Just broadcasting them over a new index.
     ode_params = {
         param: pd.Series(ode_parameters[param].mean(), index=indices.full, name=param)
-        for param in ['alpha', 'sigma', 'gamma1', 'gamma2', 'pi', 'chi']
+        for param in ['alpha', 'sigma', 'gamma', 'pi', 'chi']
     }
 
     beta, beta_wild, beta_variant, beta_hat, rho, rho_variant, rho_b1617, rho_total = get_betas_and_prevalences(

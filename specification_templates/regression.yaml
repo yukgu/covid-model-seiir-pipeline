@@ -15,10 +15,8 @@ regression_parameters:
   alpha: [0.9, 1.0]
   # 1 / incubation period.  dE/dt = -dS/dt - sigma * E
   sigma: [0.2, 0.3333]
-  # 1 / duration pre-symptomatic.  dI1/dt = sigma * E - gamma1 * I1
-  gamma1: [0.5, 0.5]
-  # 1 / duration symptomatic or asymptomatic.  dI2/dt = gamma1 * I1 - gamma2 * I2
-  gamma2: [0.3333, 1.0]
+  # 1 / duration infectious.  dI/dt = sigma * E - gamma * I
+  gamma: [0.2, 0.3333]
   # proportion increase in transmission intensity for non-escape variants
   kappa: [0.3, 0.5]
   # cross-variant immunity

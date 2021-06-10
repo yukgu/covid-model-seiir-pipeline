@@ -52,9 +52,8 @@ class FitScenario:
     name: str = field(default='')
 
     alpha: Tuple[float, float] = field(default=(0.9, 1.0))
-    sigma: Tuple[float, float] = field(default=(0.2, 1/3))
-    gamma1: Tuple[float, float] = field(default=(0.5, 0.5))
-    gamma2: Tuple[float, float] = field(default=(1/3, 1.0))
+    sigma: Tuple[float, float] = field(default=(1/5, 1/3))
+    gamma: Tuple[float, float] = field(default=(1/5, 1/3))
 
     kappa: float = field(default=0.36)
     phi: float = field(default=0.5)

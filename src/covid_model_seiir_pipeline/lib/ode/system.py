@@ -130,7 +130,7 @@ def _single_group_system(t: float,
     # Epi transitions
     transition_map = _seiir_transition_wild(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S, COMPARTMENTS.E, COMPARTMENTS.I1, COMPARTMENTS.I2, COMPARTMENTS.R,
+        COMPARTMENTS.S, COMPARTMENTS.E, COMPARTMENTS.I, COMPARTMENTS.R,
         COMPARTMENTS.S_variant, COMPARTMENTS.E_variant,
         transition_map,
     )
@@ -144,8 +144,7 @@ def _single_group_system(t: float,
 
     # Other compartments are simple.
     transition_map[COMPARTMENTS.E, COMPARTMENTS.E_u] += vaccines_out[COMPARTMENTS.E, VACCINE_TYPES.u]
-    transition_map[COMPARTMENTS.I1, COMPARTMENTS.I1_u] += vaccines_out[COMPARTMENTS.I1, VACCINE_TYPES.u]
-    transition_map[COMPARTMENTS.I2, COMPARTMENTS.I2_u] += vaccines_out[COMPARTMENTS.I2, VACCINE_TYPES.u]
+    transition_map[COMPARTMENTS.I, COMPARTMENTS.I_u] += vaccines_out[COMPARTMENTS.I, VACCINE_TYPES.u]
     transition_map[COMPARTMENTS.R, COMPARTMENTS.R_u] += vaccines_out[COMPARTMENTS.R, VACCINE_TYPES.u]
 
     ###############
@@ -154,7 +153,7 @@ def _single_group_system(t: float,
     # Epi transitions only
     transition_map = _seiir_transition_wild(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_u, COMPARTMENTS.E_u, COMPARTMENTS.I1_u, COMPARTMENTS.I2_u, COMPARTMENTS.R_u,
+        COMPARTMENTS.S_u, COMPARTMENTS.E_u, COMPARTMENTS.I_u, COMPARTMENTS.R_u,
         COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u,
         transition_map,
     )
@@ -165,7 +164,7 @@ def _single_group_system(t: float,
     # Epi transitions only
     transition_map = _seiir_transition_wild(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_p, COMPARTMENTS.E_p, COMPARTMENTS.I1_p, COMPARTMENTS.I2_p, COMPARTMENTS.R_p,
+        COMPARTMENTS.S_p, COMPARTMENTS.E_p, COMPARTMENTS.I_p, COMPARTMENTS.R_p,
         COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u,
         transition_map,
     )
@@ -176,7 +175,7 @@ def _single_group_system(t: float,
     # Epi transitions only
     transition_map = _seiir_transition_wild(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_pa, COMPARTMENTS.E_pa, COMPARTMENTS.I1_pa, COMPARTMENTS.I2_pa, COMPARTMENTS.R_pa,
+        COMPARTMENTS.S_pa, COMPARTMENTS.E_pa, COMPARTMENTS.I_pa, COMPARTMENTS.R_pa,
         COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa,
         transition_map,
     )
@@ -187,8 +186,7 @@ def _single_group_system(t: float,
     # Epi transitions
     transition_map = seiir_transition_variant(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_variant, COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant,
-        COMPARTMENTS.I2_variant, COMPARTMENTS.R_variant,
+        COMPARTMENTS.S_variant, COMPARTMENTS.E_variant, COMPARTMENTS.I_variant, COMPARTMENTS.R_variant,
         transition_map,
     )
 
@@ -204,10 +202,8 @@ def _single_group_system(t: float,
     # Other compartments are simple
     transition_map[COMPARTMENTS.E_variant, COMPARTMENTS.E_variant_u] += vaccines_out[
         COMPARTMENTS.E_variant, VACCINE_TYPES.u]
-    transition_map[COMPARTMENTS.I1_variant, COMPARTMENTS.I1_variant_u] += vaccines_out[
-        COMPARTMENTS.I1_variant, VACCINE_TYPES.u]
-    transition_map[COMPARTMENTS.I2_variant, COMPARTMENTS.I2_variant_u] += vaccines_out[
-        COMPARTMENTS.I2_variant, VACCINE_TYPES.u]
+    transition_map[COMPARTMENTS.I_variant, COMPARTMENTS.I_variant_u] += vaccines_out[
+        COMPARTMENTS.I_variant, VACCINE_TYPES.u]
     transition_map[COMPARTMENTS.R_variant, COMPARTMENTS.R_variant_u] += vaccines_out[
         COMPARTMENTS.R_variant, VACCINE_TYPES.u]
 
@@ -217,8 +213,7 @@ def _single_group_system(t: float,
     # Epi transitions only
     transition_map = seiir_transition_variant(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
-        COMPARTMENTS.I2_variant_u, COMPARTMENTS.R_variant_u,
+        COMPARTMENTS.S_variant_u, COMPARTMENTS.E_variant_u, COMPARTMENTS.I_variant_u, COMPARTMENTS.R_variant_u,
         transition_map,
     )
 
@@ -228,8 +223,7 @@ def _single_group_system(t: float,
     # Epi transitions only
     transition_map = seiir_transition_variant(
         group_y, params, aggregates, new_e,
-        COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa, COMPARTMENTS.I1_variant_pa,
-        COMPARTMENTS.I2_variant_pa, COMPARTMENTS.R_variant_pa,
+        COMPARTMENTS.S_variant_pa, COMPARTMENTS.E_variant_pa, COMPARTMENTS.I_variant_pa, COMPARTMENTS.R_variant_pa,
         transition_map,
     )
 
@@ -265,7 +259,7 @@ def _seiir_transition_wild(group_y: np.ndarray,
                            params: np.ndarray,
                            aggregates: np.ndarray,
                            new_e: np.ndarray,
-                           susceptible: int, exposed: int, infectious1: int, infectious2: int, removed: int,
+                           susceptible: int, exposed: int, infectious: int, removed: int,
                            susceptible_variant: int, exposed_variant: int,
                            transition_map: np.ndarray) -> np.ndarray:
     """Epi transitions from the wild type compartments among a vaccination subgroup."""
@@ -275,13 +269,12 @@ def _seiir_transition_wild(group_y: np.ndarray,
     new_e_variant = math.safe_divide(group_y[susceptible] * new_e[NEW_E.variant_naive], total_susceptible)
 
     transition_map[susceptible, exposed] += new_e_wild
-    transition_map[exposed, infectious1] += params[PARAMETERS.sigma] * group_y[exposed]
-    transition_map[infectious1, infectious2] += params[PARAMETERS.gamma1] * group_y[infectious1]
-    transition_map[infectious2, removed] += params[PARAMETERS.chi] * params[PARAMETERS.gamma2] * group_y[infectious2]
+    transition_map[exposed, infectious] += params[PARAMETERS.sigma] * group_y[exposed]
+    transition_map[infectious, removed] += params[PARAMETERS.chi] * params[PARAMETERS.gamma] * group_y[infectious]
 
     transition_map[susceptible, exposed_variant] += new_e_variant
-    transition_map[infectious2, susceptible_variant] += (
-        (1 - params[PARAMETERS.chi]) * params[PARAMETERS.gamma2] * group_y[infectious2]
+    transition_map[infectious, susceptible_variant] += (
+        (1 - params[PARAMETERS.chi]) * params[PARAMETERS.gamma] * group_y[infectious]
     )
 
     if DEBUG:
@@ -295,7 +288,7 @@ def seiir_transition_variant(group_y: np.ndarray,
                              params: np.ndarray,
                              aggregates: np.ndarray,
                              new_e: np.ndarray,
-                             susceptible, exposed, infectious1, infectious2, removed,
+                             susceptible, exposed, infectious, removed,
                              transition_map):
     """Epi transitions from the escape variant compartments among a vaccination subgroup."""
     total_susceptible = aggregates[AGGREGATES.susceptible_variant_only]
@@ -303,9 +296,8 @@ def seiir_transition_variant(group_y: np.ndarray,
     new_e_variant = math.safe_divide(group_y[susceptible] * new_e[NEW_E.variant_reinf], total_susceptible)
 
     transition_map[susceptible, exposed] += new_e_variant
-    transition_map[exposed, infectious1] += params[PARAMETERS.sigma] * group_y[exposed]
-    transition_map[infectious1, infectious2] += params[PARAMETERS.gamma1] * group_y[infectious1]
-    transition_map[infectious2, removed] += params[PARAMETERS.gamma2] * group_y[infectious2]
+    transition_map[exposed, infectious] += params[PARAMETERS.sigma] * group_y[exposed]
+    transition_map[infectious, removed] += params[PARAMETERS.gamma] * group_y[infectious]
 
     if DEBUG:
         assert np.all(transition_map >= 0)

@@ -61,9 +61,8 @@ class RegressionParameters:
     n_draws: int = field(default=1000)
 
     alpha: Tuple[float, float] = field(default=(0.9, 1.0))
-    sigma: Tuple[float, float] = field(default=(0.2, 1/3))
-    gamma1: Tuple[float, float] = field(default=(0.5, 0.5))
-    gamma2: Tuple[float, float] = field(default=(1/3, 1.0))
+    sigma: Tuple[float, float] = field(default=(1/5, 1/3))
+    gamma: Tuple[float, float] = field(default=(1/5, 1/3))
     kappa: Tuple[float, float] = field(default=(0.3, 0.5))
     chi: Tuple[float, float] = field(default=(0.0, 0.6))
     phi_mean_shift: float = field(default=0.5)

@@ -234,21 +234,19 @@ def compute_effective_r(model_params: ode.ForecastParameters,
                         infections: pd.Series) -> Tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
     alpha, sigma = model_params.alpha, model_params.sigma
     beta_wild, beta_variant = model_params.beta_wild, model_params.beta_variant
-    gamma1, gamma2 = model_params.gamma1, model_params.gamma2
+    gamma = model_params.gamma
 
     s_wild, s_variant = system_metrics.total_susceptible_wild, system_metrics.total_susceptible_variant
     i_wild, i_variant = system_metrics.total_infectious_wild, system_metrics.total_infectious_variant
     population = system_metrics.total_population
 
-    avg_gamma_wild = 1 / (1 / gamma1 + 1 / gamma2)
     r_controlled_wild = (
-        beta_wild * alpha * sigma / avg_gamma_wild * i_wild**(alpha - 1)
+        beta_wild * alpha * sigma / gamma * i_wild**(alpha - 1)
     ).rename('r_controlled_wild')
     r_effective_wild = (r_controlled_wild * s_wild / population).rename('r_effective_wild')
 
-    avg_gamma_variant = 1 / (1 / gamma1 + 1 / gamma2)
     r_controlled_variant = (
-        beta_variant * alpha * sigma / avg_gamma_variant * i_variant**(alpha - 1)
+        beta_variant * alpha * sigma / gamma * i_variant**(alpha - 1)
     ).rename('r_controlled_variant')
     r_effective_variant = (r_controlled_variant * s_variant / population).rename('r_effective_variant')
 

@@ -51,25 +51,25 @@ def maybe_invade(group_y: np.ndarray, group_dy: np.ndarray,
         group_y, group_dy,
         alpha, pi,
         COMPARTMENTS.S, COMPARTMENTS.E,
-        COMPARTMENTS.E_variant, COMPARTMENTS.I1_variant,
+        COMPARTMENTS.E_variant, COMPARTMENTS.I_variant,
     )
     group_dy = _invade_compartment_subset(
         group_y, group_dy,
         alpha, pi,
         COMPARTMENTS.S_u, COMPARTMENTS.E_u,
-        COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
+        COMPARTMENTS.E_variant_u, COMPARTMENTS.I_variant_u,
     )
     group_dy = _invade_compartment_subset(
         group_y, group_dy,
         alpha, pi,
         COMPARTMENTS.S_p, COMPARTMENTS.E_p,
-        COMPARTMENTS.E_variant_u, COMPARTMENTS.I1_variant_u,
+        COMPARTMENTS.E_variant_u, COMPARTMENTS.I_variant_u,
     )
     group_dy = _invade_compartment_subset(
         group_y, group_dy,
         alpha, pi,
         COMPARTMENTS.S_pa, COMPARTMENTS.E_pa,
-        COMPARTMENTS.E_variant_pa, COMPARTMENTS.I1_variant_pa,
+        COMPARTMENTS.E_variant_pa, COMPARTMENTS.I_variant_pa,
     )
     return group_dy
 

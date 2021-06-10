@@ -200,7 +200,7 @@ def _distribute_initial_condition(infections: float, group_pop: float, total_pop
         group_pop - new_e - (new_e / 5)**(1.0 / alpha)
     )
     initial_condition[offset + ode.COMPARTMENTS.E] = new_e
-    initial_condition[offset + ode.COMPARTMENTS.I1] = (new_e / 5) ** (1.0 / alpha)
+    initial_condition[offset + ode.COMPARTMENTS.I] = (new_e / 5) ** (1.0 / alpha)
     return initial_condition
 
 

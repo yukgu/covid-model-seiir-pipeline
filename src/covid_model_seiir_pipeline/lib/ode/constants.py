@@ -19,7 +19,7 @@ import numpy as np
 
 _Parameters = namedtuple(
     'Parameters', [
-        'alpha', 'sigma', 'gamma1', 'gamma2',
+        'alpha', 'sigma', 'gamma',
         'rho_variant', 'pi', 'chi',
     ]
 )
@@ -59,16 +59,16 @@ _VaccineTypes = namedtuple(
 
 _Compartments = namedtuple(
     'Compartments', [
-        'S',            'E',            'I1',            'I2',            'R',
-        'S_u',          'E_u',          'I1_u',          'I2_u',          'R_u',
-        'S_p',          'E_p',          'I1_p',          'I2_p',          'R_p',
-        'S_pa',         'E_pa',         'I1_pa',         'I2_pa',         'R_pa',
+        'S',            'E',            'I',            'R',
+        'S_u',          'E_u',          'I_u',          'R_u',
+        'S_p',          'E_p',          'I_p',          'R_p',
+        'S_pa',         'E_pa',         'I_pa',         'R_pa',
 
-        'S_variant',    'E_variant',    'I1_variant',    'I2_variant',    'R_variant',
-        'S_variant_u',  'E_variant_u',  'I1_variant_u',  'I2_variant_u',  'R_variant_u',
-        'S_variant_pa', 'E_variant_pa', 'I1_variant_pa', 'I2_variant_pa', 'R_variant_pa',
+        'S_variant',    'E_variant',    'I_variant',    'R_variant',
+        'S_variant_u',  'E_variant_u',  'I_variant_u',  'R_variant_u',
+        'S_variant_pa', 'E_variant_pa', 'I_variant_pa', 'R_variant_pa',
 
-        'S_m',                                                            'R_m',
+        'S_m',                                          'R_m',
     ]
 )
 
@@ -106,8 +106,7 @@ TRACKING_COMPARTMENTS = _TrackingCompartments(*[
 UNVACCINATED = np.array([
     COMPARTMENTS.S,  COMPARTMENTS.S_variant,
     COMPARTMENTS.E,  COMPARTMENTS.E_variant,
-    COMPARTMENTS.I1, COMPARTMENTS.I1_variant,
-    COMPARTMENTS.I2, COMPARTMENTS.I2_variant,
+    COMPARTMENTS.I, COMPARTMENTS.I_variant,
     COMPARTMENTS.R,  COMPARTMENTS.R_variant,
 ])
 SUSCEPTIBLE_WILD = np.array([
@@ -117,15 +116,10 @@ SUSCEPTIBLE_VARIANT_ONLY = np.array([
     COMPARTMENTS.S_variant, COMPARTMENTS.S_variant_u, COMPARTMENTS.S_variant_pa, COMPARTMENTS.S_m,
 ])
 INFECTIOUS_WILD = np.array([
-    COMPARTMENTS.I1,    COMPARTMENTS.I2,
-    COMPARTMENTS.I1_u,  COMPARTMENTS.I2_u,
-    COMPARTMENTS.I1_p,  COMPARTMENTS.I2_p,
-    COMPARTMENTS.I1_pa, COMPARTMENTS.I2_pa,
+    COMPARTMENTS.I, COMPARTMENTS.I_u, COMPARTMENTS.I_p, COMPARTMENTS.I_pa,
 ])
 INFECTIOUS_VARIANT = np.array([
-    COMPARTMENTS.I1_variant,    COMPARTMENTS.I2_variant,
-    COMPARTMENTS.I1_variant_u,  COMPARTMENTS.I2_variant_u,
-    COMPARTMENTS.I2_variant_pa, COMPARTMENTS.I2_variant_pa,
+    COMPARTMENTS.I_variant, COMPARTMENTS.I_variant_u, COMPARTMENTS.I_variant_pa,
 ])
 
 

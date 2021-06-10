@@ -83,17 +83,17 @@ def compute_tracking_columns(group_dy: np.ndarray,
 
     # Proportion cross immune checks
     group_dy[TRACKING_COMPARTMENTS.NewS_v] = (
-        transition_map[COMPARTMENTS.I2, COMPARTMENTS.S_variant]
-        + transition_map[COMPARTMENTS.I2_u,  COMPARTMENTS.S_variant_u]
-        + transition_map[COMPARTMENTS.I2_p, COMPARTMENTS.S_variant_u]
-        + transition_map[COMPARTMENTS.I2_pa, COMPARTMENTS.S_variant_pa]
+        transition_map[COMPARTMENTS.I, COMPARTMENTS.S_variant]
+        + transition_map[COMPARTMENTS.I_u,  COMPARTMENTS.S_variant_u]
+        + transition_map[COMPARTMENTS.I_p, COMPARTMENTS.S_variant_u]
+        + transition_map[COMPARTMENTS.I_pa, COMPARTMENTS.S_variant_pa]
     )
 
     group_dy[TRACKING_COMPARTMENTS.NewR_w] = (
-        transition_map[COMPARTMENTS.I2, COMPARTMENTS.R]
-        + transition_map[COMPARTMENTS.I2_u,  COMPARTMENTS.R_u]
-        + transition_map[COMPARTMENTS.I2_p, COMPARTMENTS.S_u]
-        + transition_map[COMPARTMENTS.I2_pa, COMPARTMENTS.S_u]
+        transition_map[COMPARTMENTS.I, COMPARTMENTS.R]
+        + transition_map[COMPARTMENTS.I_u,  COMPARTMENTS.R_u]
+        + transition_map[COMPARTMENTS.I_p, COMPARTMENTS.S_u]
+        + transition_map[COMPARTMENTS.I_pa, COMPARTMENTS.S_u]
     )
 
     group_dy[TRACKING_COMPARTMENTS.V_u] = vaccines_out[:, VACCINE_TYPES.u].sum()
