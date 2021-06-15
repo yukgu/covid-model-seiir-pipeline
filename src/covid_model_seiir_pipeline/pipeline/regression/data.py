@@ -101,7 +101,7 @@ class RegressionDataInterface:
         locations, if provided, and the available locations in the infections
         directory.
         """
-        death_threshold = 5
+        death_threshold = 0
         draw_0_data = self.load_full_past_infection_data(draw_id=0)
         total_deaths = draw_0_data.groupby('location_id').deaths.sum()
         modeled_locations = total_deaths[total_deaths > death_threshold].index.tolist()
