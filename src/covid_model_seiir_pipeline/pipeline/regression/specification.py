@@ -19,14 +19,14 @@ REGRESSION_JOBS = __RegressionJobs()
 class RegressionTaskSpecification(workflow.TaskSpecification):
     """Specification of execution parameters for regression tasks."""
     default_max_runtime_seconds = 3000
-    default_m_mem_free = '18G'
+    default_m_mem_free = '120G'
     default_num_cores = 1
 
 
 class HospitalCorrectionFactorTaskSpecification(workflow.TaskSpecification):
     """Specification of execution parameters for regression tasks."""
     default_max_runtime_seconds = 6000
-    default_m_mem_free = '20G'
+    default_m_mem_free = '100G'
     default_num_cores = 26
 
 
