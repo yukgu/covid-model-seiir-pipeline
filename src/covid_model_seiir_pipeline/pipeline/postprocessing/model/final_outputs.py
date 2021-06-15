@@ -429,11 +429,11 @@ MISCELLANEOUS = {
         'unscaled_full_data',
         aggregator=aggregators.sum_aggregator,
     ),
-    'age_specific_deaths': MiscellaneousConfig(
-        loaders.load_age_specific_deaths,
-        'age_specific_deaths',
-        aggregator=aggregators.sum_aggregator,
-    ),
+    # 'age_specific_deaths': MiscellaneousConfig(
+    #     loaders.load_age_specific_deaths,
+    #     'age_specific_deaths',
+    #     aggregator=aggregators.sum_aggregator,
+    # ),
     'excess_mortality_scalars': MiscellaneousConfig(
         loaders.load_excess_mortality_scalars,
         'excess_mortality_scalars',
