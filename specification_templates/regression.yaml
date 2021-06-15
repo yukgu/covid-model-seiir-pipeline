@@ -1,13 +1,13 @@
 data:
-  infection_version: '2021_06_03.08'
-  covariate_version: '2021_06_02.01'
-  coefficient_version: ''
+  infection_version: '2021_06_15.08'
+  covariate_version: '2021_06_12.05'
+  coefficient_version: '2021_06_09.01'
   priors_version: '2021_05_31.01'
-  location_set_version_id: 771
+  location_set_file: '/ihme/covid-19/model-inputs/best/locations/gbd_analysis_hierarchy.csv'
   output_root: ''
   output_format: 'parquet'
 workflow:
-  project: 'proj_covid_prod'
+  project: 'proj_covid'
   queue: 'd.q'
 regression_parameters:
   n_draws: 100
