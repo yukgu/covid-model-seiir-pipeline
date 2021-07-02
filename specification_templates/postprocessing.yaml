@@ -1,5 +1,5 @@
 data:
-  forecast_version: '/ihme/covid-19/seir-forecast/2021_06_15.01'
+  forecast_version: '/ihme/covid-19/seir-forecast/2021_07_01.07'
   mortality_ratio_version: 'best'
   scenarios:
     - 'reference'
@@ -12,8 +12,8 @@ resampling:
   reference_date: '2021-12-31'
   lower_quantile: 0.025
   upper_quantile: 0.975
-splicing:
-  - locations: []
-    output_version: ''
+#splicing:
+#  - locations: []
+#    output_version: ''
 aggregation:
   - location_file: '/ihme/covid-19/model-inputs/best/locations/gbd_analysis_hierarchy.csv'
