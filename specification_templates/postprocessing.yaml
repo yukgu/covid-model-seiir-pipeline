@@ -1,11 +1,12 @@
 data:
-  forecast_version: '/ihme/covid-19/seir-forecast/2021_06_09.01'
+  forecast_version: '/ihme/covid-19/seir-forecast/2021_07_03.01'
   mortality_ratio_version: 'best'
   scenarios:
     - 'reference'
-    - 'worse'
-    - 'best_masks'
-    - 'no_vaccine'
+    - 'rapid_variant_spread'
+    - 'seasonal_mask_use'
+    - 'vaccine_push'
+    - 'vaccine_push_and_seasonal_mask_use'
   output_root: ''
 workflow:
   project: 'proj_covid_prod'
@@ -15,9 +16,9 @@ resampling:
   reference_date: '2021-12-31'
   lower_quantile: 0.025
   upper_quantile: 0.975
-splicing:
-  - locations: [33, 43, 123, 172, 175, 197, 194]
-    output_version: '/ihme/covid-19/seir-outputs/2021_06_03.03'
+#splicing:
+#  - locations: [33, 43, 123, 172, 175, 197, 194]
+#    output_version: '/ihme/covid-19/seir-outputs/2021_06_03.03'
 aggregation:
   - location_file: '/ihme/covid-19/seir-outputs/agg-hierarchies/modeling.csv'
   - location_file: '/ihme/covid-19/seir-outputs/agg-hierarchies/who_plus_palestine.csv'
