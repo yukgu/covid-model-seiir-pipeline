@@ -10,9 +10,9 @@ grid_plots:
     comparators:
       - version: '2021_06_15.01'
         scenarios:
-          reference*: 'current best'
-      - version: '2021_07_01.11'
+          reference*: '6/15 run'
+      - version: '2021_07_03.01'
         scenarios:
-          reference*: 'current best'
+          reference*: 'current run'
 
 
