@@ -69,7 +69,8 @@ def run_beta_regression(regression_version: str, draw_id: int, progress_bar: boo
     logger.info('Loading regression input data', context='read')
     covariates = data_interface.load_covariates(list(regression_specification.covariates))
     gaussian_priors = data_interface.load_priors(regression_specification.covariates.values())
-    prior_coefficients = data_interface.load_prior_run_coefficients(draw_id=draw_id)
+    coefficient_draw = draw_id % 100
+    prior_coefficients = data_interface.load_prior_run_coefficients(draw_id=coefficient_draw)
     if gaussian_priors and prior_coefficients:
         raise NotImplementedError
 
