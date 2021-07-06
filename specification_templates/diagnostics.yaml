@@ -10,8 +10,8 @@ grid_plots:
     comparators:
       - version: '2021_07_01.10'
         scenarios:
-          reference*: 'last run reference'
-      - version: '2021_07_03.03'
+          reference*: 'first run reference'
+      - version: '2021_07_03.06'
         scenarios:
           reference*: 'reference'
           rapid_variant_spread: 'rapid_variant_spread'
