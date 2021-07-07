@@ -8,13 +8,13 @@ grid_plots:
     date_start: '2020-03-01'
     date_end: '2022-03-31'
     comparators:
-      - version: '2021_07_01.10'
-        scenarios:
-          reference*: 'first run reference'
-      - version: '2021_07_03.06'
+      - version: '2021_07_06.06'
         scenarios:
           reference*: 'reference'
           rapid_variant_spread: 'rapid_variant_spread'
           seasonal_mask_use: 'seasonal_mask_use'
-          vaccine_push: 'vaccine_push'
-          vaccine_push_and_seasonal_mask_use: 'best'
+          vaccine_boosters: 'vaccine_boosters'
+          vaccine_combined_and_seasonal_mask_use: 'vaccine_combined_and_seasonal_mask_use'
+          vaccine_reduced_hesitancy: 'vaccine_reduced_hesitancy'
+          vaccine_combined: 'vaccine_combined'
+          vaccine_increased_supply: 'vaccine_increased_supply'
