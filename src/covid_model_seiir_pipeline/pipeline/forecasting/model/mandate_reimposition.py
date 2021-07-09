@@ -29,7 +29,7 @@ def compute_reimposition_threshold(past_deaths, population, reimposition_thresho
     )
     bad_locs = days_over_death_rate[days_over_death_rate >= 7].index
     reimposition_threshold.loc[bad_locs] = 2*max_threshold.loc[bad_locs]
-
+    reimposition_threshold.loc[71] = 0.1 / 1_000_000  # Australia is super low
     return reimposition_threshold
 
 

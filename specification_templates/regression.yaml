@@ -1,6 +1,6 @@
 data:
-  infection_version: '2021_07_03.08'
-  covariate_version: '2021_07_02.02'
+  infection_version: '2021_07_08.05'
+  covariate_version: '2021_07_08.03'
   coefficient_version: '2021_06_30.03'
   priors_version: '2021_05_31.01'
   location_set_file: '/ihme/covid-19/model-inputs/best/locations/gbd_analysis_hierarchy.csv'
