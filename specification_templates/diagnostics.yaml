@@ -8,7 +8,7 @@ grid_plots:
     date_start: '2020-03-01'
     date_end: '2022-03-31'
     comparators:
-      - version: '2021_07_06.06'
+      - version: '2021_07_08.02'
         scenarios:
           reference*: 'reference'
           rapid_variant_spread: 'rapid_variant_spread'
