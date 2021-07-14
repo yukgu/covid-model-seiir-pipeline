@@ -175,6 +175,8 @@ class FitRoot(DataRoot):
     beta = DatasetType('beta', LEAF_TEMPLATES.DRAW_TEMPLATE, PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
     compartments = DatasetType('compartments', LEAF_TEMPLATES.DRAW_TEMPLATE, PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
     ode_parameters = DatasetType('ode_parameters', LEAF_TEMPLATES.DRAW_TEMPLATE, PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
+    regression_parameters = DatasetType('regression_parameters', LEAF_TEMPLATES.DRAW_TEMPLATE, PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
+    coefficients = DatasetType('coefficients', LEAF_TEMPLATES.DRAW_TEMPLATE, PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
 
 
 class RegressionRoot(DataRoot):
@@ -223,3 +225,9 @@ class PostprocessingRoot(DataRoot):
     output_miscellaneous = DatasetType('output_miscellaneous',
                                        LEAF_TEMPLATES.MEASURE_TEMPLATE,
                                        PREFIX_TEMPLATES.SCENARIO_TEMPLATE)
+
+
+class DiagnosticsRoot(DataRoot):
+    """Data root representing postprocessing stage outputs."""
+    metadata = MetadataType('metadata')
+    specification = MetadataType('diagnostics_specification')

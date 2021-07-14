@@ -8,7 +8,6 @@ from covid_model_seiir_pipeline.lib import (
 )
 from covid_model_seiir_pipeline.pipeline.forecasting.model.containers import (
     Indices,
-    ModelParameters,
     PostprocessingParameters,
     HospitalMetrics,
     SystemMetrics,
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
 def compute_output_metrics(indices: Indices,
                            future_components: pd.DataFrame,
                            postprocessing_params: PostprocessingParameters,
-                           model_parameters: ModelParameters,
+                           model_parameters: ode.ForecastParameters,
                            hospital_parameters: 'HospitalParameters') -> Tuple[pd.DataFrame,
                                                                                SystemMetrics,
                                                                                OutputMetrics]:
@@ -98,7 +97,7 @@ def compute_output_metrics(indices: Indices,
 
 
 def variant_system_metrics(indices: Indices,
-                           model_parameters: ModelParameters,
+                           model_parameters: ode.ForecastParameters,
                            postprocessing_params: PostprocessingParameters,
                            components: pd.DataFrame) -> SystemMetrics:
     components_diff = components.groupby('location_id').diff()
@@ -169,6 +168,7 @@ def variant_system_metrics(indices: Indices,
         total_susceptible_wild=s_wild,
         total_susceptible_variant=s_variant,
         total_susceptible_variant_only=s_variant_only,
+        total_susceptible_variant_unprotected=s_variant_unprotected,
         total_infectious_wild=i_wild,
         total_infectious_variant=i_variant,
         total_immune_wild=immune_wild,
@@ -215,7 +215,7 @@ def compute_deaths(modeled_infections: pd.Series,
     return modeled_deaths
 
 
-def compute_effective_r(model_params: ModelParameters,
+def compute_effective_r(model_params: ode.ForecastParameters,
                         system_metrics: SystemMetrics,
                         infections: pd.Series) -> Tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
     alpha, sigma = model_params.alpha, model_params.sigma
@@ -238,8 +238,7 @@ def compute_effective_r(model_params: ModelParameters,
     ).rename('r_controlled_variant')
     r_effective_variant = (r_controlled_variant * s_variant / population).rename('r_effective_variant')
 
-    # TODO: I don't know, compute this from something? Sample from gamma dist?
-    average_generation_time = 7
+    average_generation_time = int(round((1 / sigma + 1 / gamma1 + 1 / gamma2).mean()))
     r_effective_empirical = infections.groupby('location_id').apply(lambda x: x / x.shift(average_generation_time))
 
     return (
