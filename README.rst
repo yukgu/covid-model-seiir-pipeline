@@ -1,3 +1,8 @@
+
+IHME COVID-19 Forecasting Team. Modeling COVID-19 scenarios for the United States. Nature Medicine. 23 October 2020. doi:10.1038/s41591-020-1132-9.
+
+https://www.nature.com/articles/s41591-020-1132-9#code-availability
+
 Covid Model SEIIR Pipeline
 ==========================
 
